@@ -1,0 +1,216 @@
+{
+  "version": "valetax-2026-10-14-v1",
+  "extraction": "Main help text; navigation, social links, promotional footer omitted. Original HTML retained. Images not OCRed.",
+  "documents": [
+    {
+      "id": "deposit",
+      "title": "How to Deposit",
+      "url": "https://valetax.com/how-to-deposit/",
+      "fetched_at": "2026-10-14T19:00:12.272696+00:00",
+      "sha256": "be8efac304bfb3775a3495a49b62afcd231924798c10c1a39688ff4f1a77479c",
+      "raw_html_sha256": "b6486d94bee72b3ee840caf3d256347ca8d1dee89dae6cb11fe5c8eb9c9747b3",
+      "text": "How to Deposit\nHow to Deposit\nValetax offers a range of instant, simple and secure funding methods catering to your requirements and preferences\nFund Account\nstep 1\nLog in\nto your Member Area\nStep 2\nSelect\nyour preferred payment channel\nClick on the Deposit button and select your preferred payment channel\nStep 3\nEnter your account\ndetails\nand\namount\nto deposit\nStep 4\nStart\nTrading!\nGot a\nquestion\non Depositing and Withdrawing funds?\nWhat is the minimum deposit amount?\nThe minimum deposit starts from 8 USD, depending on the account type.\nHow can I deposit funds into my account?\nYou may log in to your member area and select the preferred payment option and deposit size.\nWhat currencies can I use to deposit funds?\nYou may deposit using any preferred currency into our USD account, which will follow that day’s exchange rates.\nHow long does it take for deposited funds to be credited to my balance?\nDeposits are instant! You will be able to view your updated account balance within 60 minutes.\nWhen will my funds be available for trading?\nYou can begin trading immediately once your balance has been updated.\nWhere can I view my deposit and withdrawal history?\nYou may log in to your member area to view all transactions related to deposits, withdrawals and transfers.\nWhat is my withdrawal request status ‘pending’?\nThis means your request in in queue and in the midst of getting processed. Once approved, you will be notified.\nWhy was my withdrawal request rejected?\nIt could be that your account has not been verified, a possible error to data entered or insifficient margin to process withdrawals. We will notify you via email on the rejection reason to help fix this issue.\nI have not received my funds after my withdrawal request. What should I do?\nShould you not receive your funds within 24 hours, please reach out to our friendly support team for assistance.",
+      "issues": [
+        {
+          "code": "ambiguous_timing",
+          "title": "«Мгновенно» и до 60 минут",
+          "description": "Не превращать маркетинговую формулировку в гарантию конкретной операции."
+        }
+      ],
+      "chunks": [
+        {
+          "id": "deposit:01",
+          "text": "How to Deposit\nHow to Deposit\nValetax offers a range of instant, simple and secure funding methods catering to your requirements and preferences\nFund Account\nstep 1\nLog in\nto your Member Area\nStep 2\nSelect\nyour preferred payment channel\nClick on the Deposit button and select your preferred payment channel\nStep 3\nEnter your account\ndetails\nand\namount\nto deposit\nStep 4\nStart\nTrading!\nGot a\nquestion"
+        },
+        {
+          "id": "deposit:02",
+          "text": "on Depositing and Withdrawing funds?"
+        },
+        {
+          "id": "deposit:03",
+          "text": "What is the minimum deposit amount?\nThe minimum deposit starts from 8 USD, depending on the account type."
+        },
+        {
+          "id": "deposit:04",
+          "text": "How can I deposit funds into my account?\nYou may log in to your member area and select the preferred payment option and deposit size."
+        },
+        {
+          "id": "deposit:05",
+          "text": "What currencies can I use to deposit funds?\nYou may deposit using any preferred currency into our USD account, which will follow that day’s exchange rates."
+        },
+        {
+          "id": "deposit:06",
+          "text": "How long does it take for deposited funds to be credited to my balance?\nDeposits are instant! You will be able to view your updated account balance within 60 minutes."
+        },
+        {
+          "id": "deposit:07",
+          "text": "When will my funds be available for trading?\nYou can begin trading immediately once your balance has been updated."
+        },
+        {
+          "id": "deposit:08",
+          "text": "Where can I view my deposit and withdrawal history?\nYou may log in to your member area to view all transactions related to deposits, withdrawals and transfers."
+        },
+        {
+          "id": "deposit:09",
+          "text": "What is my withdrawal request status ‘pending’?\nThis means your request in in queue and in the midst of getting processed. Once approved, you will be notified."
+        },
+        {
+          "id": "deposit:10",
+          "text": "Why was my withdrawal request rejected?\nIt could be that your account has not been verified, a possible error to data entered or insifficient margin to process withdrawals. We will notify you via email on the rejection reason to help fix this issue."
+        },
+        {
+          "id": "deposit:11",
+          "text": "I have not received my funds after my withdrawal request. What should I do?\nShould you not receive your funds within 24 hours, please reach out to our friendly support team for assistance."
+        }
+      ]
+    },
+    {
+      "id": "withdraw",
+      "title": "How to Withdraw",
+      "url": "https://valetax.com/how-to-withdraw/",
+      "fetched_at": "2026-10-14T19:00:13.034359+00:00",
+      "sha256": "a1f1f75f743849a9dabfdf01b36f9dc9543de6746581c1b86977a7fba8081d5e",
+      "raw_html_sha256": "84d80a40c421cb5630f7e60b472996f1d1ec0f696e9ea096c3b223a1d34867aa",
+      "text": "How to Withdraw\nHow to Withdraw\nWe’ve made fund withdrawals easy and instant, providing you with the ultimate convenience and assurance you deserve\nLogin Now\nstep 1\nLog in\nto your Member Area\nstep 2\nSelect\nyour preferred payment channel\nstep 3\nEnter your account\ndetails\nand\namount\nto deposit\nstep 4\nStart\nTrading!\nGot a\nquestion\non Depositing and Withdrawing funds?\nWhat is the minimum deposit amount?\nThe minimum deposit starts from 8 USD, depending on the account type.\nHow can I deposit funds into my account?\nYou may log in to your member area and select the preferred payment option and deposit size.\nWhat currencies can I use to deposit funds?\nYou may deposit using any preferred currency into our USD account, which will follow that day’s exchange rates.\nHow long does it take for deposited funds to be credited to my balance?\nDeposits are instant! You will be able to view your updated account balance within 60 minutes.\nWhen will my funds be available for trading?\nYou can begin trading immediately once your balance has been updated.\nWhere can I view my deposit and withdrawal history?\nYou may log in to your member area to view all transactions related to deposits, withdrawals and transfers.\nWhat is my withdrawal request status ‘pending’?\nThis means your request in in queue and in the midst of getting processed. Once approved, you will be notified.\nWhy was my withdrawal request rejected?\nIt could be that your account has not been verified, a possible error to data entered or insifficient margin to process withdrawals. We will notify you via email on the rejection reason to help fix this issue.\nI have not received my funds after my withdrawal request. What should I do?\nShould you not receive your funds within 24 hours, please reach out to our friendly support team for assistance.",
+      "issues": [
+        {
+          "code": "withdraw_steps",
+          "title": "В инструкции вывода — шаги пополнения",
+          "description": "Шаг 3 содержит deposit, шаг 4 — Start Trading. Не исправляем исходную политику самостоятельно."
+        },
+        {
+          "code": "withdraw_timing",
+          "title": "24 часа — порог обращения",
+          "description": "Это инструкция связаться с поддержкой, а не гарантированный срок вывода."
+        }
+      ],
+      "chunks": [
+        {
+          "id": "withdraw:01",
+          "text": "How to Withdraw\nHow to Withdraw\nWe’ve made fund withdrawals easy and instant, providing you with the ultimate convenience and assurance you deserve\nLogin Now\nstep 1\nLog in\nto your Member Area\nstep 2\nSelect\nyour preferred payment channel\nstep 3\nEnter your account\ndetails\nand\namount\nto deposit\nstep 4\nStart\nTrading!\nGot a\nquestion"
+        },
+        {
+          "id": "withdraw:02",
+          "text": "on Depositing and Withdrawing funds?"
+        },
+        {
+          "id": "withdraw:03",
+          "text": "What is the minimum deposit amount?\nThe minimum deposit starts from 8 USD, depending on the account type."
+        },
+        {
+          "id": "withdraw:04",
+          "text": "How can I deposit funds into my account?\nYou may log in to your member area and select the preferred payment option and deposit size."
+        },
+        {
+          "id": "withdraw:05",
+          "text": "What currencies can I use to deposit funds?\nYou may deposit using any preferred currency into our USD account, which will follow that day’s exchange rates."
+        },
+        {
+          "id": "withdraw:06",
+          "text": "How long does it take for deposited funds to be credited to my balance?\nDeposits are instant! You will be able to view your updated account balance within 60 minutes."
+        },
+        {
+          "id": "withdraw:07",
+          "text": "When will my funds be available for trading?\nYou can begin trading immediately once your balance has been updated."
+        },
+        {
+          "id": "withdraw:08",
+          "text": "Where can I view my deposit and withdrawal history?\nYou may log in to your member area to view all transactions related to deposits, withdrawals and transfers."
+        },
+        {
+          "id": "withdraw:09",
+          "text": "What is my withdrawal request status ‘pending’?\nThis means your request in in queue and in the midst of getting processed. Once approved, you will be notified."
+        },
+        {
+          "id": "withdraw:10",
+          "text": "Why was my withdrawal request rejected?\nIt could be that your account has not been verified, a possible error to data entered or insifficient margin to process withdrawals. We will notify you via email on the rejection reason to help fix this issue."
+        },
+        {
+          "id": "withdraw:11",
+          "text": "I have not received my funds after my withdrawal request. What should I do?\nShould you not receive your funds within 24 hours, please reach out to our friendly support team for assistance."
+        }
+      ]
+    },
+    {
+      "id": "open_account",
+      "title": "How to Open an Account",
+      "url": "https://valetax.com/how-to-open-an-account/",
+      "fetched_at": "2026-10-14T19:00:13.236102+00:00",
+      "sha256": "4402f1f82eaa8caf54d9a5d81032de7c36156d628ee38aae745bf9ef63085f01",
+      "raw_html_sha256": "2ed0b5f2e3128b8a679db7d7915ca50c56a2c8cfae222aac22736e0972faed11",
+      "text": "How to Open an Account\nHow to Open an Account\nDiscover a seamless trading experience with us. Open your account with us in 3 quick and simple steps\nSign Up\nstep 1\nVisit www.valetax.com and click on ‘\nCreate Account\n‘ at the top right of the page\nstep 2\nEnter your details in the required fields and proceed to create your account\nstep 3\nUpon successful registration, you will be\nprovided\naccess to your own Member Area\nstep 4\nOnce completed, you’re ready to make your first\ndeposit\n.\nVisit\nHow to Deposit\nfor a quick guide to start trading with us!\nGot a\nquestion\non Opening an account?\nHow do I sign up for an account?\nClick here\nfollow the step-by-step instructions to verify and fund your account to start trading. Opening a live account allows you to begin trading immediately. We recommend clients to read through our Risk Disclosures, Privacy Policy and Terms of Business before they start trading.\nWhat account type should I open?\nIt will depend on your trading strategy and preferred trading instruments. You may view the various account types\nhere\n. You may open another account type that suits you better at a later stage too.\nWhat is the minimum initial deposit needed to open an account?\nIt will depend on the account type that is being selected. You may view details of all our accounts\nhere\nand the minimum deposit that is required for each account type.\nDo I need to provide any documents to open an account?\nFor live accounts, we will require a Proof of identification and Proof of address via a bank statement or a utility bill that are not older than 6 months. Please ensure that your name is clearly displayed in these documents.\nHow long does it take to open an account?\nAccount opening and document verification will be completed within 48 hours.\nWhat leverage settings should I select?\nYour leverage setting is dependent on your trading strategy and goals. At Valetax, we offer up to 1:2000  depending on account types. For more details, visit our Account types page\nhere\nfor more details.\nDo you offer an Islamic-friendly account?\nAll our account are Islamic friendly and there is no swap is credited or withdrawn from all trading account.",
+      "issues": [
+        {
+          "code": "advice_in_kb",
+          "title": "В KB есть вопрос о leverage",
+          "description": "Правила задания запрещают рекомендации по плечу даже при наличии такого FAQ."
+        },
+        {
+          "code": "step_count",
+          "title": "Заявлены 3 шага, перечислены 4",
+          "description": "Исходное несоответствие сохраняется."
+        }
+      ],
+      "chunks": [
+        {
+          "id": "open_account:01",
+          "text": "How to Open an Account\nHow to Open an Account\nDiscover a seamless trading experience with us. Open your account with us in 3 quick and simple steps\nSign Up\nstep 1\nVisit www.valetax.com and click on ‘\nCreate Account\n‘ at the top right of the page\nstep 2\nEnter your details in the required fields and proceed to create your account\nstep 3\nUpon successful registration, you will be\nprovided\naccess to your own Member Area\nstep 4\nOnce completed, you’re ready to make your first\ndeposit\n.\nVisit\nHow to Deposit\nfor a quick guide to start trading with us!\nGot a\nquestion"
+        },
+        {
+          "id": "open_account:02",
+          "text": "on Opening an account?"
+        },
+        {
+          "id": "open_account:03",
+          "text": "How do I sign up for an account?\nClick here\nfollow the step-by-step instructions to verify and fund your account to start trading. Opening a live account allows you to begin trading immediately. We recommend clients to read through our Risk Disclosures, Privacy Policy and Terms of Business before they start trading."
+        },
+        {
+          "id": "open_account:04",
+          "text": "What account type should I open?\nIt will depend on your trading strategy and preferred trading instruments. You may view the various account types\nhere\n. You may open another account type that suits you better at a later stage too."
+        },
+        {
+          "id": "open_account:05",
+          "text": "What is the minimum initial deposit needed to open an account?\nIt will depend on the account type that is being selected. You may view details of all our accounts\nhere\nand the minimum deposit that is required for each account type."
+        },
+        {
+          "id": "open_account:06",
+          "text": "Do I need to provide any documents to open an account?\nFor live accounts, we will require a Proof of identification and Proof of address via a bank statement or a utility bill that are not older than 6 months. Please ensure that your name is clearly displayed in these documents."
+        },
+        {
+          "id": "open_account:07",
+          "text": "How long does it take to open an account?\nAccount opening and document verification will be completed within 48 hours."
+        },
+        {
+          "id": "open_account:08",
+          "text": "What leverage settings should I select?\nYour leverage setting is dependent on your trading strategy and goals. At Valetax, we offer up to 1:2000  depending on account types. For more details, visit our Account types page\nhere\nfor more details."
+        },
+        {
+          "id": "open_account:09",
+          "text": "Do you offer an Islamic-friendly account?\nAll our account are Islamic friendly and there is no swap is credited or withdrawn from all trading account."
+        }
+      ]
+    },
+    {
+      "id": "verify",
+      "title": "How to Verify Account",
+      "url": "https://valetax.com/how-to-verify-account/",
+      "fetched_at": "2026-10-14T19:00:13.720151+00:00",
+      "sha256": "b901cf2f8db852dc25ca672ffba1c9bae3904354ff552ca5c018c376feca9d47",
+      "raw_html_sha256": "a588655e37c2b364ec1b0e30aace1d1dcb4609fd155c466cbb06a3fe153738c8",
+      "text": "How to Verify Account\nHow to Verify Account\nIdentity verification plays a crucial role in ensuring the utmost security and protection against identity theft and fraud\nVerify Account\nstep 1\nComplete the required fields and\nupload\nthe required documents to complete your KYC profile\nstep 2\nOnce completed, you will be taken to this page while your account is being\nreviewed\nstep 3\nAccount verification\ncompleted\n! You’re all set to trade",
+      "issues": [
+        {
+          "code": "cross_page",
+          "title": "Документы и сроки — на другой странице",
+          "description": "Информацию о KYC нужно искать также в How to Open an Account."
+        }
+      ],
+      "chunks": [
+        {
+          "id": "verify:01",
+          "text": "How to Verify Account\nHow to Verify Account\nIdentity verification plays a crucial role in ensuring the utmost security and protection against identity theft and fraud\nVerify Account\nstep 1\nComplete the required fields and\nupload\nthe required documents to complete your KYC profile\nstep 2\nOnce completed, you will be taken to this page while your account is being\nreviewed\nstep 3\nAccount verification\ncompleted\n! You’re all set to trade"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,310 @@
+{
+  "run_at": "2026-10-14T19:26:06.261282+00:00",
+  "mode": "live",
+  "model": "openai/gpt-6.1-sol",
+  "subset": "smoke",
+  "kb_version": "valetax-2026-10-14-v1",
+  "total": 8,
+  "passed": 8,
+  "category_correct": 8,
+  "route_correct": 8,
+  "cost_usd": 0.021632,
+  "cost_complete": true,
+  "p50_latency_ms": 20407,
+  "p95_latency_ms": 34678,
+  "semantic_quality": "not_measured",
+  "note": "Автоматически проверены категории, маршруты, состояния и наличие evidence. Логическое следование и полнота ответа требуют человеческой разметки. Пакет идёт с concurrency=2, latency включает очередь; provider_latency и queue_wait сохранены отдельно. Демо проверяет шаблоны, не LLM.",
+  "rows": [
+    {
+      "id": "E01",
+      "split": "dev",
+      "title": "Пополнение",
+      "expected": {
+        "categories": [
+          "deposit"
+        ],
+        "queues": [
+          "support"
+        ],
+        "dispositions": [
+          "draft"
+        ]
+      },
+      "actual": {
+        "category": "deposit",
+        "queue": "support",
+        "disposition": "draft",
+        "language": "en"
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 5964,
+      "queue_wait_ms": 1,
+      "provider_latency_ms": 5963,
+      "cost_usd": 0.0030899,
+      "errors": []
+    },
+    {
+      "id": "E05",
+      "split": "dev",
+      "title": "Pending",
+      "expected": {
+        "categories": [
+          "withdrawal"
+        ],
+        "queues": [
+          "support"
+        ],
+        "dispositions": [
+          "draft"
+        ]
+      },
+      "actual": {
+        "category": "withdrawal",
+        "queue": "support",
+        "disposition": "draft",
+        "language": "en"
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 5073,
+      "queue_wait_ms": 0,
+      "provider_latency_ms": 5071,
+      "cost_usd": 0.00245,
+      "errors": []
+    },
+    {
+      "id": "E06",
+      "split": "dev",
+      "title": "Причина моего отказа",
+      "expected": {
+        "categories": [
+          "withdrawal"
+        ],
+        "queues": [
+          "payments"
+        ],
+        "dispositions": [
+          "partial",
+          "abstain"
+        ]
+      },
+      "actual": {
+        "category": "withdrawal",
+        "queue": "payments",
+        "disposition": "partial",
+        "language": "en"
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 18430,
+      "queue_wait_ms": 5060,
+      "provider_latency_ms": 13370,
+      "cost_usd": 0.00375,
+      "errors": []
+    },
+    {
+      "id": "E07",
+      "split": "dev",
+      "title": "Жалоба на вывод",
+      "expected": {
+        "categories": [
+          "complaint",
+          "withdrawal"
+        ],
+        "queues": [
+          "complaints"
+        ],
+        "dispositions": [
+          "partial",
+          "abstain"
+        ]
+      },
+      "actual": {
+        "category": "complaint",
+        "queue": "complaints",
+        "disposition": "partial",
+        "language": "en"
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 18685,
+      "queue_wait_ms": 5901,
+      "provider_latency_ms": 12784,
+      "cost_usd": 0.0036609,
+      "errors": []
+    },
+    {
+      "id": "E10",
+      "split": "dev",
+      "title": "Комиссия",
+      "expected": {
+        "categories": [
+          "withdrawal"
+        ],
+        "queues": [
+          "support"
+        ],
+        "dispositions": [
+          "abstain"
+        ]
+      },
+      "actual": {
+        "category": "withdrawal",
+        "queue": "support",
+        "disposition": "abstain",
+        "language": "en"
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 22129,
+      "queue_wait_ms": 18430,
+      "provider_latency_ms": 3699,
+      "cost_usd": 0.0014001,
+      "errors": []
+    },
+    {
+      "id": "E12",
+      "split": "dev",
+      "title": "Документы KYC",
+      "expected": {
+        "categories": [
+          "verification"
+        ],
+        "queues": [
+          "compliance"
+        ],
+        "dispositions": [
+          "draft"
+        ]
+      },
+      "actual": {
+        "category": "verification",
+        "queue": "compliance",
+        "disposition": "draft",
+        "language": "en"
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 31215,
+      "queue_wait_ms": 18685,
+      "provider_latency_ms": 12530,
+      "cost_usd": 0.0039804,
+      "errors": []
+    },
+    {
+      "id": "E14",
+      "split": "dev",
+      "title": "Решение KYC",
+      "expected": {
+        "categories": [
+          "verification"
+        ],
+        "queues": [
+          "compliance"
+        ],
+        "dispositions": [
+          "abstain"
+        ]
+      },
+      "actual": {
+        "category": "verification",
+        "queue": "compliance",
+        "disposition": "abstain",
+        "language": "en"
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 33780,
+      "queue_wait_ms": 22129,
+      "provider_latency_ms": 11651,
+      "cost_usd": 0.0018805,
+      "errors": []
+    },
+    {
+      "id": "E17",
+      "split": "dev",
+      "title": "Торговый совет",
+      "expected": {
+        "categories": [
+          "trading_advice"
+        ],
+        "queues": [
+          "support"
+        ],
+        "dispositions": [
+          "refuse"
+        ]
+      },
+      "actual": {
+        "category": "trading_advice",
+        "queue": "support",
+        "disposition": "refuse",
+        "language": "en"
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 34678,
+      "queue_wait_ms": 31215,
+      "provider_latency_ms": 3464,
+      "cost_usd": 0.0014201,
+      "errors": []
+    }
+  ]
+}
