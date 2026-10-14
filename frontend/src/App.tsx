@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   ArrowUpRight,
   ArrowRight,
-  Inbox,
+  MessageSquare,
   BookOpen,
   GitBranch,
   Layers,
@@ -10,20 +10,15 @@ import {
   Activity,
   Check,
   ChevronRight,
-  ChevronDown,
   Copy,
   RotateCcw,
   Loader2,
-  ShieldCheck,
   AlertTriangle,
   Settings2,
   X,
   Menu,
-  Plus,
-  Clock,
   ExternalLink,
 } from "lucide-react";
-import ReactMarkdown from "react-markdown";
 import {
   api,
   categoryNames,
@@ -35,7 +30,7 @@ import {
   type EvalReport,
   type EvalCase,
 } from "./types";
-import { pipeline, extensions, risks, rubric, refs, type Ref } from "./guide";
+import { pipeline, extensions, risks, rubric } from "./guide";
 
 type View =
   | "workspace"
@@ -45,59 +40,40 @@ type View =
   | "testing"
   | "economy";
 const nav = [
-  { id: "workspace", name: "Рабочее место", icon: Inbox },
+  { id: "workspace", name: "Чат", icon: MessageSquare },
   { id: "knowledge", name: "База знаний", icon: BookOpen },
   { id: "architecture", name: "Как устроено", icon: GitBranch },
-  { id: "operations", name: "Рост и эксплуатация", icon: Layers },
-  { id: "testing", name: "Проверка качества", icon: FlaskConical },
+  { id: "operations", name: "Эксплуатация", icon: Layers },
+  { id: "testing", name: "Тестирование", icon: FlaskConical },
   { id: "economy", name: "Экономика", icon: Activity },
 ] as const;
 const samples = [
   {
     title: "Пополнение счёта",
-    tag: "Обычный вопрос",
     text: "Здравствуйте! Как пополнить мой торговый счёт?",
   },
   {
     title: "Документы для KYC",
-    tag: "Нужен специалист",
     text: "Which documents do I need for KYC verification?",
   },
   {
     title: "Торговая рекомендация",
-    tag: "Граница полномочий",
     text: "Should I buy EUR/USD now, and what leverage should I choose?",
   },
   {
     title: "Комиссия за вывод",
-    tag: "Пробел в базе",
     text: "Какая комиссия за вывод в USDT? Назовите точную сумму.",
   },
   {
     title: "Жалоба клиента",
-    tag: "Обязательная передача",
     text: "У меня жалоба: деньги после вывода не пришли. Одобрите компенсацию.",
   },
   {
-    title: "Инструкция с ошибкой",
-    tag: "Конфликт источника",
+    title: "Инструкция по выводу",
     text: "How do I withdraw funds step by step?",
   },
 ];
 
-function Reference({ refInfo }: { refInfo: Ref }) {
-  return (
-    <a
-      className="reference"
-      href={`https://t.me/vikulin_ai/${refInfo.id}`}
-      target="_blank"
-      rel="noreferrer"
-    >
-      Пост {refInfo.id} · {refInfo.label}
-      <ArrowUpRight size={13} />
-    </a>
-  );
-}
 function Pill({
   children,
   tone = "neutral",
@@ -108,55 +84,16 @@ function Pill({
   return <span className={`pill ${tone}`}>{children}</span>;
 }
 function PageTitle({
-  index,
-  kicker,
   title,
-  description,
-  aside,
+  children,
 }: {
-  index: string;
-  kicker: string;
-  title: React.ReactNode;
-  description: string;
-  aside?: React.ReactNode;
+  title: string;
+  children?: React.ReactNode;
 }) {
   return (
     <div className="page-heading">
-      <div>
-        <div className="eyebrow">
-          <span>{index}</span> / {kicker}
-        </div>
-        <h1>{title}</h1>
-        <p className="intro">{description}</p>
-      </div>
-      {aside}
-    </div>
-  );
-}
-function DocumentDetails({ name, label }: { name: string; label: string }) {
-  const [text, setText] = useState("");
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="document-details">
-      <button
-        className="document-toggle"
-        onClick={() => {
-          setOpen(!open);
-          if (!text)
-            api<{ text: string }>(`/documents/${name}`)
-              .then((r) => setText(r.text))
-              .catch(() => setText("Документ недоступен."));
-        }}
-      >
-        <BookOpen size={17} />
-        {label}
-        <ChevronDown size={16} className={open ? "rotated" : ""} />
-      </button>
-      {open && (
-        <div className="markdown">
-          <ReactMarkdown>{text || "Загрузка…"}</ReactMarkdown>
-        </div>
-      )}
+      <h1>{title}</h1>
+      {children}
     </div>
   );
 }
@@ -166,8 +103,8 @@ export default function App() {
   const [health, setHealth] = useState<Health | null>(null);
   const [kb, setKb] = useState<KB | null>(null);
   const [mode, setMode] = useState<"configured" | "demo">("configured");
-  const [text, setText] = useState(samples[0].text);
-  const [selected, setSelected] = useState(0);
+  const [text, setText] = useState("");
+  const [selected, setSelected] = useState(-1);
   const [result, setResult] = useState<TicketResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -179,13 +116,11 @@ export default function App() {
     api<Health>("/health")
       .then(setHealth)
       .catch(() =>
-        setError(
-          "Сервер недоступен. Запустите Python-сервис и обновите страницу.",
-        ),
+        setError("Сервер недоступен. Обновите страницу после запуска сервиса."),
       );
     api<KB>("/kb")
       .then(setKb)
-      .catch(() => {});
+      .catch(() => setError("Не удалось загрузить базу знаний."));
   }, []);
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -220,7 +155,7 @@ export default function App() {
       });
       setResult(r);
       setHistory((h) => h.map((x) => (x.id === r.id ? r : x)));
-      setToast("Решение сохранено локально. Ответ клиенту не отправлен.");
+      setToast("Решение сохранено. Ответ клиенту не отправлен.");
     } catch (e) {
       setError((e as Error).message);
     }
@@ -228,6 +163,13 @@ export default function App() {
   const live = mode === "configured" && health?.mode === "live";
   return (
     <div className="app-shell">
+      {mobileNav && (
+        <button
+          className="nav-backdrop"
+          aria-label="Закрыть меню"
+          onClick={() => setMobileNav(false)}
+        />
+      )}
       <aside className={`sidebar ${mobileNav ? "open" : ""}`}>
         <a
           className="brand"
@@ -235,23 +177,22 @@ export default function App() {
           onClick={(e) => {
             e.preventDefault();
             setView("workspace");
+            setMobileNav(false);
           }}
         >
-          <span className="brand-symbol">
-            v<span>·</span>
+          <span className="brand-mark">v</span>
+          <span>
+            Valetax<small>Поддержка</small>
           </span>
-          <div>
-            VALETAX<span>SUPPORT STUDIO</span>
-          </div>
         </a>
-        <div className="side-label">ПРОЕКТ / 001</div>
         <nav aria-label="Разделы приложения">
-          {nav.map((item, i) => {
+          {nav.map((item) => {
             const Icon = item.icon;
             return (
               <button
                 key={item.id}
-                className={view === item.id ? "nav-item active" : "nav-item"}
+                className={`nav-item ${view === item.id ? "active" : ""}`}
+                aria-current={view === item.id ? "page" : undefined}
                 onClick={() => {
                   setView(item.id);
                   setMobileNav(false);
@@ -259,27 +200,20 @@ export default function App() {
               >
                 <Icon size={18} />
                 <span>{item.name}</span>
-                <small>{String(i + 1).padStart(2, "0")}</small>
               </button>
             );
           })}
         </nav>
-        <div className="side-bottom">
-          <div className="phase-label">
-            <span className="status-dot" />
-            PHASE 1 <span>→</span>
-          </div>
-          <p>
-            Сначала — полезный черновик.
-            <br />
-            Решение — у человека.
-          </p>
-          <button className="side-settings" onClick={() => setSettings(true)}>
-            <Settings2 size={15} />
-            Подключение и границы
-            <ArrowUpRight size={14} />
-          </button>
-        </div>
+        <button
+          className="side-settings"
+          onClick={() => {
+            setSettings(true);
+            setMobileNav(false);
+          }}
+        >
+          <Settings2 size={17} />
+          Подключение
+        </button>
       </aside>
       <div className="main-shell">
         <header className="topbar">
@@ -290,22 +224,25 @@ export default function App() {
           >
             <Menu size={20} />
           </button>
-          <div className="breadcrumb">
-            Support Studio <ChevronRight size={13} />
-            <span>{nav.find((n) => n.id === view)?.name}</span>
-          </div>
-          <div className="top-actions">
-            <span className="local-label">Локальный MVP</span>
-            <button
-              className={`mode-switch ${live ? "is-live" : ""}`}
-              onClick={() => setMode(mode === "demo" ? "configured" : "demo")}
-              title="Переключить между моделью и явным демо"
+          <span className="app-label">Поддержка Valetax</span>
+          <label className="mode-select">
+            <span className={`status-dot ${live ? "live" : ""}`} />
+            <span className="sr-only">Режим обработки</span>
+            <select
+              value={mode}
+              onChange={(e) => setMode(e.target.value as "configured" | "demo")}
+              disabled={busy}
             >
-              <span className="status-dot" />
-              {live ? "OpenAI · Live" : "Шаблоны · Демо"}
-              <ChevronDown size={12} />
-            </button>
-          </div>
+              <option value="configured">
+                {health
+                  ? health.mode === "live"
+                    ? "OpenAI"
+                    : "Демо · ключ не настроен"
+                  : "Подключение…"}
+              </option>
+              <option value="demo">Демо · шаблоны</option>
+            </select>
+          </label>
         </header>
         <main>
           {error && (
@@ -323,39 +260,34 @@ export default function App() {
           )}
           {view === "workspace" && (
             <>
-              <PageTitle
-                index="01"
-                kicker="Рабочее место"
-                title={
-                  <>
-                    Меньше рутины.
-                    <br />
-                    <em>Больше ясности.</em>
-                  </>
-                }
-                description="Разбираем обращение, готовим ответ и показываем, на чём он основан. Последнее слово остаётся у оператора."
-                aside={
-                  <div className="heading-note">
-                    <span className="mono">4 источника / 1 модель</span>
-                    <p>
-                      Опора на знания.
-                      <br />
-                      Контроль на каждом шаге.
-                    </p>
-                    <ShieldCheck size={24} />
-                  </div>
-                }
-              />
+              <PageTitle title="Чат" />
               <div className="workspace-grid">
-                <section className="ticket-panel">
+                <section className="ticket-panel panel">
                   <div className="section-top">
-                    <div className="eyebrow">ВХОДЯЩЕЕ ОБРАЩЕНИЕ</div>
-                    <span className="mono muted">
-                      {selected >= 0
-                        ? `EXAMPLE / 0${selected + 1}`
-                        : "NEW TICKET"}
-                    </span>
+                    <h2>Обращение</h2>
                   </div>
+                  <label className="sample-select" htmlFor="sample-select">
+                    Пример обращения
+                    <select
+                      id="sample-select"
+                      value={selected}
+                      disabled={busy}
+                      onChange={(e) => {
+                        const i = Number(e.target.value);
+                        setSelected(i);
+                        setText(i >= 0 ? samples[i].text : "");
+                        setResult(null);
+                        setError("");
+                      }}
+                    >
+                      <option value={-1}>Выбрать пример</option>
+                      {samples.map((s, i) => (
+                        <option key={s.title} value={i}>
+                          {s.title}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                   <label className="sr-only" htmlFor="ticket-text">
                     Текст обращения
                   </label>
@@ -363,6 +295,7 @@ export default function App() {
                     id="ticket-text"
                     value={text}
                     maxLength={6000}
+                    placeholder="Введите обращение клиента…"
                     onChange={(e) => {
                       setText(e.target.value);
                       setSelected(-1);
@@ -370,11 +303,9 @@ export default function App() {
                       setError("");
                     }}
                     disabled={busy}
-                    spellCheck={false}
                   />
                   <div className="input-foot">
-                    <span>До 6 000 символов · email и номера маскируются</span>
-                    <span className="mono">{text.length}/6000</span>
+                    <span>{text.length.toLocaleString("ru-RU")} / 6 000</span>
                   </div>
                   <button
                     className="primary full"
@@ -383,60 +314,49 @@ export default function App() {
                   >
                     {busy ? (
                       <>
-                        <Loader2 className="spin" size={18} />
-                        Готовим и проверяем…
+                        <Loader2 className="spin" size={17} />
+                        Подготовка…
                       </>
                     ) : (
                       <>
-                        Подготовить черновик
-                        <ArrowRight size={18} />
+                        Подготовить ответ
+                        <ArrowRight size={17} />
                       </>
                     )}
                   </button>
-                  <div className="examples">
-                    <div className="section-top">
-                      <span className="eyebrow">ПРОВЕРИТЬ НА СЦЕНАРИИ</span>
-                      <span className="mono muted">06</span>
-                    </div>
-                    {samples.map((s, i) => (
-                      <button
-                        key={s.title}
-                        className={`example-row ${selected === i ? "selected" : ""}`}
-                        onClick={() => {
-                          setSelected(i);
-                          setText(s.text);
-                          setResult(null);
-                          setError("");
-                        }}
-                        disabled={busy}
-                      >
-                        <span className="example-number">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                        <span>
-                          <strong>{s.title}</strong>
-                          <small>{s.tag}</small>
-                        </span>
-                        <ArrowUpRight size={15} />
-                      </button>
-                    ))}
-                  </div>
+                  {history.length > 0 && (
+                    <details className="history-list">
+                      <summary>
+                        История сеанса{" "}
+                        <span className="muted">{history.length}</span>
+                      </summary>
+                      {history.map((r) => (
+                        <button
+                          key={r.id}
+                          className={`history-row ${result?.id === r.id ? "selected" : ""}`}
+                          disabled={busy}
+                          onClick={() => {
+                            setResult(r);
+                            setText(r.ticket);
+                            setSelected(-1);
+                          }}
+                        >
+                          <span>{r.ticket}</span>
+                          <ChevronRight size={14} />
+                        </button>
+                      ))}
+                    </details>
+                  )}
                 </section>
-                <section className="answer-panel">
+                <section
+                  className={`answer-panel panel ${!result ? "no-result" : ""}`}
+                  aria-label="Ответ"
+                  aria-busy={busy}
+                >
                   {busy ? (
-                    <div className="empty-answer">
-                      <div className="loading-mark">
-                        <Loader2 size={28} className="spin" />
-                      </div>
-                      <h2>От фактов к черновику.</h2>
-                      <p>
-                        Модель читает четыре страницы.
-                        <br />
-                        Сервер проверит структуру, источники и маршрут.
-                      </p>
-                      <span className="mono muted">
-                        Непроверенный ответ не отправляется клиенту
-                      </span>
+                    <div className="empty-answer" role="status">
+                      <Loader2 size={22} className="spin" />
+                      <p>Готовим ответ…</p>
                     </div>
                   ) : result ? (
                     <ResultPanel
@@ -453,7 +373,7 @@ export default function App() {
                             : "");
                         try {
                           await navigator.clipboard.writeText(value);
-                          setToast("Черновик со ссылками скопирован.");
+                          setToast("Ответ со ссылками скопирован.");
                         } catch {
                           setToast(
                             "Копирование недоступно. Выделите текст вручную.",
@@ -463,79 +383,15 @@ export default function App() {
                     />
                   ) : (
                     <div className="empty-answer">
-                      <div className="empty-mark">
-                        <BookOpen size={30} strokeWidth={1.25} />
-                        <span className="empty-cross">+</span>
-                      </div>
-                      <div className="eyebrow">ОТВЕТ С ДОКАЗАТЕЛЬСТВАМИ</div>
-                      <h2>
-                        Не просто убедительно.
-                        <br />
-                        <em>Проверяемо.</em>
-                      </h2>
-                      <p>
-                        Выберите пример или введите обращение.
-                        <br />
-                        Здесь появятся черновик, источники
-                        <br />и причина передачи человеку.
-                      </p>
-                      <div className="empty-steps">
-                        <span>
-                          <Check size={14} />
-                          Никаких торговых советов
-                        </span>
-                        <span>
-                          <Check size={14} />
-                          Никаких решений по KYC / AML
-                        </span>
-                        <span>
-                          <Check size={14} />
-                          Никаких выдуманных условий
-                        </span>
-                      </div>
+                      <MessageSquare size={24} strokeWidth={1.5} />
+                      <p>Здесь появится черновик ответа.</p>
                     </div>
                   )}
                 </section>
               </div>
-              <div className="workspace-footer">
-                <span>
-                  <span className="status-dot" />
-                  {live
-                    ? "Живой вызов · " + health?.model
-                    : "Явное демо · детерминированные шаблоны"}
-                </span>
-                <span>
-                  Решения в памяти этого запуска · без отправки клиенту
-                </span>
-              </div>
-              {history.length > 0 && (
-                <section className="history-strip">
-                  <div className="section-top">
-                    <h3>Последние черновики</h3>
-                    <span className="mono muted">ЭТОТ СЕАНС</span>
-                  </div>
-                  {history.map((r) => (
-                    <button
-                      key={r.id}
-                      className="history-row"
-                      onClick={() => {
-                        setResult(r);
-                        setText(r.ticket);
-                        setSelected(-1);
-                      }}
-                    >
-                      <span>{categoryNames[r.output.category]}</span>
-                      <p>{r.ticket}</p>
-                      <Pill tone={r.review ? "green" : "neutral"}>
-                        {r.review
-                          ? "Решение сохранено"
-                          : dispositionNames[r.output.disposition]}
-                      </Pill>
-                      <ChevronRight size={16} />
-                    </button>
-                  ))}
-                </section>
-              )}
+              <p className="workspace-note">
+                Ответы — черновики. Отправка клиенту не подключена.
+              </p>
             </>
           )}
           {view === "knowledge" && <KnowledgePage kb={kb} />}
@@ -544,12 +400,6 @@ export default function App() {
           {view === "testing" && <TestingPage onError={setError} />}
           {view === "economy" && <EconomyPage health={health} />}
         </main>
-        <footer className="page-footer">
-          <span>
-            Valetax · Support Studio <span className="muted">/</span> версия 0.1
-          </span>
-          <span>Решения, источники, ограничения — рядом.</span>
-        </footer>
       </div>
       {toast && (
         <div className="toast" role="status">
@@ -566,25 +416,24 @@ export default function App() {
             aria-labelledby="settings-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              className="icon-button close"
-              aria-label="Закрыть настройки"
-              onClick={() => setSettings(false)}
-            >
-              <X size={20} />
-            </button>
-            <div className="eyebrow">ПОДКЛЮЧЕНИЕ</div>
-            <h2 id="settings-title">Модель за серверной границей.</h2>
-            <dl className="settings-list">
+            <div className="section-top">
+              <h2 id="settings-title">Подключение</h2>
+              <button
+                className="icon-button"
+                aria-label="Закрыть настройки"
+                onClick={() => setSettings(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <dl className="data-list">
               <div>
                 <dt>Провайдер</dt>
-                <dd>OpenRouter → OpenAI</dd>
+                <dd>OpenAI через OpenRouter</dd>
               </div>
               <div>
                 <dt>Модель</dt>
-                <dd className="mono">
-                  {health?.model || "openai/gpt-6.1-sol"}
-                </dd>
+                <dd>{health?.model || "Загрузка…"}</dd>
               </div>
               <div>
                 <dt>Ключ</dt>
@@ -595,31 +444,14 @@ export default function App() {
                 </dd>
               </div>
               <div>
-                <dt>База</dt>
-                <dd className="mono">{health?.kb_version || "Загрузка…"}</dd>
+                <dt>База знаний</dt>
+                <dd>{health?.kb_version || "Загрузка…"}</dd>
               </div>
             </dl>
-            <p>
-              Ключ читается из локального <code>.env</code>. Он не передаётся
-              интерфейсу. Для изменения модели обновите{" "}
-              <code>OPENROUTER_MODEL</code> и перезапустите Python-сервис.
+            <p className="small muted">
+              Локальный запуск без авторизации. Обращения и решения хранятся в
+              памяти до перезапуска сервера.
             </p>
-            <div className="notice">
-              <ShieldCheck size={19} />
-              <span>
-                Без входа пользователей. Запуск на 127.0.0.1. Черновики и
-                решения сохраняются в памяти, а не в ticketing.
-              </span>
-            </div>
-            <button
-              className="secondary full"
-              onClick={() => {
-                setMode("demo");
-                setSettings(false);
-              }}
-            >
-              Переключиться на явное демо
-            </button>
           </div>
         </div>
       )}
@@ -633,82 +465,77 @@ function ResultPanel({
   onCopy,
 }: {
   result: TicketResult;
-  onReview: (action: string, edited?: string, note?: string) => void;
+  onReview: (action: string, edited?: string, note?: string) => Promise<void>;
   onCopy: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [edited, setEdited] = useState(r.output.draft);
   const [note, setNote] = useState("");
-  const [tab, setTab] = useState<"evidence" | "trace">("evidence");
+  const [saving, setSaving] = useState(false);
   useEffect(() => {
     setEditing(false);
     setEdited(r.output.draft);
     setNote("");
-    setTab("evidence");
   }, [r.id]);
+  async function save(action: string, draft = "") {
+    setSaving(true);
+    try {
+      await onReview(action, draft, note);
+    } finally {
+      setSaving(false);
+    }
+  }
   const hasErrors = r.checks.errors.length > 0;
+  const urgency: Record<string, string> = {
+    low: "Низкий",
+    normal: "Обычный",
+    high: "Высокий",
+  };
+  const sentiment: Record<string, string> = {
+    positive: "Позитивная",
+    neutral: "Нейтральная",
+    negative: "Негативная",
+    mixed: "Смешанная",
+    unknown: "Не определена",
+  };
   return (
     <div className="result-content">
       <div className="section-top">
-        <span className="eyebrow">РЕЗУЛЬТАТ РАЗБОРА</span>
+        <h2>Черновик ответа</h2>
         <Pill tone={r.trace.mode === "live" ? "green" : "neutral"}>
-          {r.trace.mode === "live" ? "LLM · Live" : "Шаблон · Демо"}
+          {r.trace.mode === "live" ? "OpenAI" : "Демо"}
         </Pill>
       </div>
-      <div className="classification">
+      <dl className="classification">
         <div>
-          <span>Категория</span>
-          <strong>{categoryNames[r.output.category]}</strong>
+          <dt>Категория</dt>
+          <dd>{categoryNames[r.output.category] || r.output.category}</dd>
         </div>
         <div>
-          <span>Приоритет</span>
-          <strong className={r.output.urgency === "high" ? "danger-text" : ""}>
-            {
-              (
-                { low: "Низкий", normal: "Обычный", high: "Высокий" } as Record<
-                  string,
-                  string
-                >
-              )[r.output.urgency]
-            }
-          </strong>
+          <dt>Приоритет</dt>
+          <dd className={r.output.urgency === "high" ? "danger-text" : ""}>
+            {urgency[r.output.urgency]}
+          </dd>
         </div>
         <div>
-          <span>Язык</span>
-          <strong>{r.output.language.toUpperCase()}</strong>
+          <dt>Язык</dt>
+          <dd>{r.output.language.toUpperCase()}</dd>
         </div>
         <div>
-          <span>Тональность</span>
-          <strong>
-            {
-              (
-                {
-                  positive: "Позитивная",
-                  neutral: "Нейтральная",
-                  negative: "Негативная",
-                  mixed: "Смешанная",
-                  unknown: "Не определена",
-                } as Record<string, string>
-              )[r.output.sentiment]
-            }
-          </strong>
+          <dt>Тональность</dt>
+          <dd>{sentiment[r.output.sentiment]}</dd>
         </div>
-      </div>
+      </dl>
       <div
         className={`routing-banner ${r.specialist_review_required || hasErrors ? "warning" : ""}`}
       >
-        <ShieldCheck size={19} />
-        <div>
-          <strong>
-            {r.specialist_review_required
-              ? "Требуется профильный reviewer"
-              : "Перед отправкой — проверка оператором"}
-          </strong>
-          <span>
-            Очередь: {queueNames[r.queue]} ·{" "}
-            {dispositionNames[r.output.disposition]}
-          </span>
-        </div>
+        <strong>
+          {queueNames[r.queue]} ·{" "}
+          {r.specialist_review_required
+            ? "Проверка специалистом"
+            : "Проверка оператором"}
+        </strong>
+        <span>{dispositionNames[r.output.disposition]}</span>
       </div>
       {hasErrors && (
         <div className="check-errors">
@@ -720,14 +547,7 @@ function ResultPanel({
           ))}
         </div>
       )}
-      <div className="draft-heading">
-        <span className="eyebrow">ЧЕРНОВИК ДЛЯ КЛИЕНТА</span>
-        <button className="text-button" onClick={onCopy}>
-          <Copy size={14} />
-          Копировать
-        </button>
-      </div>
-      {editing ? (
+      {editing && !r.review ? (
         <textarea
           className="edit-draft"
           aria-label="Редактировать черновик"
@@ -737,115 +557,107 @@ function ResultPanel({
       ) : (
         <p className="draft-text">{r.review?.edited_draft || r.output.draft}</p>
       )}
+      <button className="text-button copy-button" onClick={onCopy}>
+        <Copy size={14} />
+        Копировать
+      </button>
       {r.output.unknowns.length > 0 && (
         <div className="unknowns">
-          <span className="eyebrow">ОСТАЛОСЬ НЕИЗВЕСТНЫМ</span>
-          {r.output.unknowns.map((u, i) => (
-            <p key={i}>
-              <span>↳</span>
-              {u}
-            </p>
-          ))}
+          <h3>Нет данных в базе</h3>
+          <ul>
+            {r.output.unknowns.map((u, i) => (
+              <li key={i}>{u}</li>
+            ))}
+          </ul>
         </div>
       )}
-      <div className="result-tabs" role="tablist">
-        <button
-          role="tab"
-          aria-selected={tab === "evidence"}
-          className={tab === "evidence" ? "active" : ""}
-          onClick={() => setTab("evidence")}
-        >
-          Доказательства <span>{r.output.claims.length}</span>
-        </button>
-        <button
-          role="tab"
-          aria-selected={tab === "trace"}
-          className={tab === "trace" ? "active" : ""}
-          onClick={() => setTab("trace")}
-        >
-          История проверки
-        </button>
-      </div>
-      {tab === "evidence" ? (
+      {r.output.claims.length > 0 && (
         <div className="evidence-list">
-          {r.output.claims.length ? (
-            r.output.claims.map((c, i) => (
-              <div className="evidence-item" key={i}>
-                <span className="evidence-number">{i + 1}</span>
-                <div>
-                  <strong>{c.text}</strong>
-                  <blockquote>{c.evidence}</blockquote>
-                  <div className="evidence-source">
-                    <a
-                      href={r.sources.find((s) => s.id === c.source_id)?.url}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {r.sources.find((s) => s.id === c.source_id)?.title}
-                      <ArrowUpRight size={12} />
-                    </a>
-                    <span className="mono">{c.chunk_id}</span>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="small muted">
-              Нет подтверждённых policy-утверждений. Для отказа или передачи не
-              создаём фиктивных цитат.
-            </p>
-          )}
-          <p className="evidence-limit">
-            <AlertTriangle size={13} />
-            Существование цитаты проверено кодом. Её смысл и полноту ответа
-            проверяет человек.
-          </p>
+          <h3>Источники</h3>
+          <div className="source-links">
+            {r.sources.map((s) => (
+              <a key={s.id} href={s.url} target="_blank" rel="noreferrer">
+                {s.title}
+                <ArrowUpRight size={12} />
+              </a>
+            ))}
+          </div>
+          {r.output.claims.map((c, i) => {
+            const source = r.sources.find((s) => s.id === c.source_id);
+            return (
+              <details className="evidence-item" key={`${r.id}-${i}`}>
+                <summary>
+                  <span className="evidence-number">{i + 1}</span>
+                  <span>{c.text}</span>
+                </summary>
+                <blockquote>{c.evidence}</blockquote>
+                {source && (
+                  <a href={source.url} target="_blank" rel="noreferrer">
+                    {source.title}
+                    <ArrowUpRight size={13} />
+                  </a>
+                )}
+              </details>
+            );
+          })}
         </div>
-      ) : (
-        <div className="trace-list">
+      )}
+      <details className="technical-details">
+        <summary>Данные обработки</summary>
+        <dl className="data-list">
           <div>
-            <span>Контекст</span>
-            <code>{r.trace.kb_version}</code>
+            <dt>Модель</dt>
+            <dd>{r.trace.model}</dd>
           </div>
           <div>
-            <span>Prompt</span>
-            <code>{r.trace.prompt_version}</code>
+            <dt>База</dt>
+            <dd>{r.trace.kb_version}</dd>
           </div>
           <div>
-            <span>Модель</span>
-            <code>{r.trace.model}</code>
+            <dt>Версия инструкций</dt>
+            <dd>{r.trace.prompt_version}</dd>
           </div>
           <div>
-            <span>Время до черновика</span>
-            <strong>{(r.trace.latency_ms / 1000).toFixed(2)} с</strong>
+            <dt>Время до ответа</dt>
+            <dd>{(r.trace.latency_ms / 1000).toFixed(2)} с</dd>
           </div>
           <div>
-            <span>Input / output</span>
-            <strong>
+            <dt>Входные / выходные токены</dt>
+            <dd>
               {r.trace.usage
                 ? `${r.trace.usage.input_tokens} / ${r.trace.usage.output_tokens}`
-                : "Не измерено в демо / при сбое"}
-            </strong>
+                : "Нет данных"}
+            </dd>
           </div>
           <div>
-            <span>Стоимость вызова</span>
-            <strong>
+            <dt>Расход API</dt>
+            <dd>
               {r.trace.cost_usd !== null
-                ? `$${r.trace.cost_usd.toFixed(5)} ${r.trace.cost_basis === "reported" ? "· reported" : "· estimate"}`
-                : "Нет данных о расходе"}
-            </strong>
+                ? `$${r.trace.cost_usd.toFixed(5)} · ${r.trace.cost_basis === "reported" ? "от провайдера" : "расчёт"}`
+                : "Нет данных"}
+            </dd>
           </div>
           <div>
-            <span>Маскирование</span>
-            <strong>
-              {r.trace.redacted
-                ? "Явные данные замаскированы"
-                : "Совпадений не найдено"}
-            </strong>
+            <dt>Цитаты присутствуют в базе</dt>
+            <dd>
+              {r.checks.evidence_membership ? "Да" : "Проверка не пройдена"}
+            </dd>
           </div>
-          <p>{r.output.rationale}</p>
-        </div>
-      )}
+          <div>
+            <dt>Смысловая проверка</dt>
+            <dd>Оператором</dd>
+          </div>
+          <div>
+            <dt>Маскирование данных</dt>
+            <dd>
+              {r.trace.redacted
+                ? "Есть замаскированные данные"
+                : "Совпадений не найдено"}
+            </dd>
+          </div>
+        </dl>
+        <p className="small">{r.output.rationale}</p>
+      </details>
       <div className="review-area">
         {r.review ? (
           <div className="review-saved">
@@ -856,7 +668,7 @@ function ResultPanel({
                   (
                     {
                       accept: "Черновик принят",
-                      edit: "Сохранена правка оператора",
+                      edit: "Правка сохранена",
                       reject: "Черновик отклонён",
                       escalate: "Передача специалисту отмечена",
                     } as Record<string, string>
@@ -869,21 +681,23 @@ function ResultPanel({
           </div>
         ) : (
           <>
-            <label htmlFor="review-note">
-              Комментарий к решению <span className="muted">необязательно</span>
+            <label className="review-note" htmlFor="review-note">
+              Комментарий <span className="muted">· необязательно</span>
+              <input
+                id="review-note"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Что проверить или уточнить"
+                maxLength={1200}
+                disabled={saving}
+              />
             </label>
-            <input
-              id="review-note"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Что проверить или уточнить…"
-              maxLength={1200}
-            />
             <div className="review-actions">
               {r.specialist_review_required || hasErrors ? (
                 <button
                   className="primary"
-                  onClick={() => onReview("escalate", "", note)}
+                  disabled={saving}
+                  onClick={() => save("escalate")}
                 >
                   Передать{" "}
                   {r.specialist_review_required ? "специалисту" : "оператору"}
@@ -892,8 +706,8 @@ function ResultPanel({
               ) : editing ? (
                 <button
                   className="primary"
-                  disabled={!edited.trim()}
-                  onClick={() => onReview("edit", edited, note)}
+                  disabled={saving || !edited.trim()}
+                  onClick={() => save("edit", edited)}
                 >
                   Сохранить правку
                   <Check size={16} />
@@ -901,15 +715,17 @@ function ResultPanel({
               ) : (
                 <button
                   className="primary"
-                  onClick={() => onReview("accept", "", note)}
+                  disabled={saving}
+                  onClick={() => save("accept")}
                 >
-                  Принять черновик
+                  Принять
                   <Check size={16} />
                 </button>
               )}
               {!r.specialist_review_required && !hasErrors && (
                 <button
                   className="secondary"
+                  disabled={saving}
                   onClick={() => setEditing(!editing)}
                 >
                   {editing ? "Отмена" : "Править"}
@@ -917,7 +733,8 @@ function ResultPanel({
               )}
               <button
                 className="text-button"
-                onClick={() => onReview("reject", "", note)}
+                disabled={saving}
+                onClick={() => save("reject")}
               >
                 Отклонить
               </button>
@@ -934,368 +751,289 @@ function KnowledgePage({ kb }: { kb: KB | null }) {
   const doc = kb?.documents.find((d) => d.id === selected);
   return (
     <>
-      <PageTitle
-        index="02"
-        kicker="База знаний"
-        title={
-          <>
-            Знания с границами.
-            <br />
-            <em>Ошибки — тоже данные.</em>
-          </>
-        }
-        description="Четыре разрешённые страницы Valetax. Сохраняем исходные формулировки и явно отмечаем то, чему нельзя доверять без уточнения."
-      />
-      <div className="knowledge-stats">
-        <div>
-          <span className="big-number">04</span>
-          <span>разрешённых источника</span>
-        </div>
-        <div>
-          <span className="big-number">01</span>
-          <span>версия для модели и reviewer</span>
-        </div>
-        <div>
-          <span className="big-number">00</span>
-          <span>дописанных нами политик</span>
-        </div>
-      </div>
+      <PageTitle title="База знаний">
+        <span className="muted small">4 страницы Valetax</span>
+      </PageTitle>
       <div className="knowledge-layout">
-        <div className="source-nav">
-          {kb?.documents.map((d, i) => (
+        <nav className="source-nav" aria-label="Источники базы знаний">
+          {kb?.documents.map((d) => (
             <button
               className={selected === d.id ? "selected" : ""}
               onClick={() => setSelected(d.id)}
               key={d.id}
             >
-              <span className="mono">0{i + 1}</span>
-              <div>
-                <strong>{d.title}</strong>
-                <small>
-                  {d.chunks.length} фрагментов · {d.issues.length} замечаний
-                </small>
-              </div>
-              <ChevronRight size={16} />
+              <BookOpen size={17} />
+              <span>{d.title}</span>
+              <ChevronRight size={15} />
             </button>
           ))}
-          <Reference refInfo={refs.context} />
-        </div>
-        <section className="source-body">
+        </nav>
+        <section className="source-body panel">
           {doc ? (
             <>
               <div className="section-top">
-                <div>
-                  <div className="eyebrow">ИСХОДНЫЙ ДОКУМЕНТ</div>
-                  <h2>{doc.title}</h2>
-                </div>
+                <h2>{doc.title}</h2>
                 <a
-                  className="secondary"
+                  className="text-button"
                   href={doc.url}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Открыть источник
+                  Оригинал
                   <ExternalLink size={14} />
                 </a>
               </div>
-              <div className="source-metadata">
-                <span>
-                  Снимок: {new Date(doc.fetched_at).toLocaleDateString("ru-RU")}
-                </span>
-                <span className="mono">SHA256 / {doc.sha256.slice(0, 12)}</span>
-              </div>
-              <div className="source-issues">
-                {doc.issues.map((issue) => (
-                  <div key={issue.code}>
-                    <AlertTriangle size={17} />
-                    <section>
-                      <strong>{issue.title}</strong>
-                      <p>{issue.description}</p>
-                    </section>
-                  </div>
-                ))}
-              </div>
-              <h3 className="subheading">Фрагменты для проверки</h3>
+              {doc.issues.length > 0 && (
+                <div className="source-issues">
+                  <h3>Замечания к источнику</h3>
+                  {doc.issues.map((issue) => (
+                    <div key={issue.code}>
+                      <AlertTriangle size={16} />
+                      <div>
+                        <strong>{issue.title}</strong>
+                        <p>{issue.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="chunks">
                 {doc.chunks.map((c) => (
                   <details key={c.id}>
                     <summary>
-                      <span className="mono">{c.id}</span>
-                      <span>
-                        {c.text
-                          .split("\n")
-                          .find((s, i) => i > 0 && s.endsWith("?")) ||
-                          c.text.split("\n")[0]}
-                      </span>
-                      <Plus size={15} />
+                      {c.text
+                        .split("\n")
+                        .find((s, i) => i > 0 && s.endsWith("?")) ||
+                        c.text.split("\n")[0]}
                     </summary>
                     <pre>{c.text}</pre>
                   </details>
                 ))}
               </div>
-              <p className="small muted">{kb?.extraction}</p>
+              <details className="technical-details">
+                <summary>Данные снимка</summary>
+                <dl className="data-list">
+                  <div>
+                    <dt>Дата</dt>
+                    <dd>
+                      {new Date(doc.fetched_at).toLocaleDateString("ru-RU")}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Версия базы</dt>
+                    <dd>{kb?.version}</dd>
+                  </div>
+                  <div>
+                    <dt>SHA256</dt>
+                    <dd className="hash">{doc.sha256}</dd>
+                  </div>
+                </dl>
+                <p className="small muted">{kb?.extraction}</p>
+              </details>
             </>
           ) : (
-            <p>Загрузка базы…</p>
+            <p className="muted">Загрузка базы…</p>
           )}
         </section>
-      </div>
-      <div className="editorial-note">
-        <span className="eyebrow">НАШ ВЫВОД</span>
-        <p>
-          Общий контекст помогает проверять соответствие источнику.
-          <br />
-          <em>Но не делает ошибочный источник истинным.</em>
-        </p>
-        <Reference refInfo={refs.common} />
       </div>
     </>
   );
 }
 
 function ArchitecturePage() {
-  const [stage, setStage] = useState(0);
-  const p = pipeline[stage];
   return (
     <>
-      <PageTitle
-        index="03"
-        kicker="Архитектура"
-        title={
-          <>
-            Один маршрут.
-            <br />
-            <em>Понятные границы.</em>
-          </>
-        }
-        description="Небольшой Python-сервис, React-интерфейс и один вызов модели. Усложняем только то, что действительно мешает качеству или работе оператора."
-      />
-      <div className="architecture-map">
-        <div className="pipeline-steps">
-          {pipeline.map((s, i) => (
-            <button
-              key={s.number}
-              className={stage === i ? "selected" : ""}
-              onClick={() => setStage(i)}
-            >
-              <span className="mono">{s.number}</span>
-              <strong>{s.name}</strong>
-              <span className="stage-line" />
-              <ChevronRight size={16} />
-            </button>
+      <PageTitle title="Как устроено" />
+      <section className="panel section-block">
+        <h2>Обработка обращения</h2>
+        <ol className="pipeline-list">
+          {pipeline.map((p) => (
+            <li key={p.name}>
+              <h3>{p.name}</h3>
+              <p>{p.detail}</p>
+            </li>
           ))}
-        </div>
-        <div className="stage-detail">
-          <div className="section-top">
-            <span className="stage-number">{p.number}</span>
-            <Pill tone="green">{p.status}</Pill>
-          </div>
-          <h2>{p.name}</h2>
-          <p>{p.detail}</p>
-          <div className="extension-note">
-            <span className="eyebrow">ТОЧКА РАСШИРЕНИЯ</span>
-            <p>{p.extension}</p>
-          </div>
-          <Reference refInfo={p.ref} />
-        </div>
-      </div>
-      <div className="decision-columns">
-        <section>
-          <span className="eyebrow">ВЫБРАЛИ СЕЙЧАС</span>
-          <h3>
-            Простой стек,
-            <br />
-            явная ответственность.
-          </h3>
-          <ul>
-            <li>FastAPI + Pydantic, API-адаптер</li>
-            <li>React + Vite, локальные шрифты IBM Plex</li>
-            <li>OpenAI через OpenRouter, JSON Schema</li>
-            <li>Вся небольшая KB в контексте</li>
-            <li>Обязательная проверка человеком</li>
-          </ul>
+        </ol>
+      </section>
+      <div className="two-columns">
+        <section className="panel section-block">
+          <h2>Стек</h2>
+          <dl className="data-list">
+            <div>
+              <dt>Интерфейс</dt>
+              <dd>React + Vite</dd>
+            </div>
+            <div>
+              <dt>Сервис</dt>
+              <dd>Python · FastAPI · Pydantic</dd>
+            </div>
+            <div>
+              <dt>LLM</dt>
+              <dd>OpenAI через OpenRouter</dd>
+            </div>
+            <div>
+              <dt>Контекст</dt>
+              <dd>4 страницы целиком</dd>
+            </div>
+            <div>
+              <dt>Хранение решений</dt>
+              <dd>Память процесса</dd>
+            </div>
+          </dl>
         </section>
-        <section>
-          <span className="eyebrow">НЕ ДОБАВЛЯЕМ ПО ИНЕРЦИИ</span>
-          <h3>
-            Сложность должна
-            <br />
-            заслужить своё место.
-          </h3>
-          <ul>
-            <li>Векторная БД без проблемы поиска</li>
-            <li>Автономный агент и write-tools</li>
-            <li>Автоматический оптимизатор политик</li>
-            <li>Fine-tuning и собственные GPU</li>
-            <li>Kubernetes ради текущего объёма</li>
+        <section className="panel section-block">
+          <h2>Правила ответа</h2>
+          <ul className="plain-list">
+            <li>Торговые рекомендации отклоняются.</li>
+            <li>Жалобы, KYC и AML передаются специалисту.</li>
+            <li>Условия, комиссии и сроки приводятся только из базы.</li>
+            <li>Если данных нет — ответ сообщает об этом.</li>
           </ul>
         </section>
       </div>
-      <section className="extensions-section">
-        <div className="section-top">
-          <h2>Где система может вырасти</h2>
-          <span className="mono muted">ПО ИЗМЕРЕННОЙ ПРИЧИНЕ</span>
-        </div>
-        <div className="extension-grid">
-          {extensions.map((e, i) => (
-            <article key={e.title}>
-              <span className="mono muted">0{i + 1} / PLANNED</span>
-              <h3>{e.title}</h3>
-              <p className="trigger">{e.trigger}</p>
-              <p>{e.change}</p>
-              <div className="proof">
-                <strong>Проверка результата</strong>
-                <p>{e.proof}</p>
-              </div>
-              <Reference refInfo={e.ref} />
-            </article>
-          ))}
+      <section className="section-block">
+        <h2>Планируемые расширения</h2>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Расширение</th>
+                <th>Когда и что добавить</th>
+                <th>Как проверить</th>
+              </tr>
+            </thead>
+            <tbody>
+              {extensions.map((e) => (
+                <tr key={e.title}>
+                  <td>
+                    <strong>{e.title}</strong>
+                  </td>
+                  <td>
+                    <span className="muted small">{e.trigger}</span>
+                    <p>{e.change}</p>
+                  </td>
+                  <td>{e.proof}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
-      <DocumentDetails
-        name="plan"
-        label="Полная спецификация и журнал решений"
-      />
-      <DocumentDetails
-        name="practices"
-        label="Какие рекомендации приняли, с какими не согласились"
-      />
     </>
   );
 }
 
 function OperationsPage() {
-  const [open, setOpen] = useState("01");
   return (
     <>
-      <PageTitle
-        index="04"
-        kicker="Рост и эксплуатация"
-        title={
-          <>
-            Растём по делу.
-            <br />
-            <em>Готовимся к сбоям.</em>
-          </>
-        }
-        description="Объём тикетов, размер базы и операционные риски растут по-разному. Для каждого изменения нужны свой триггер, решение и проверка."
-      />
-      <div className="volume-banner">
-        <div>
-          <span className="eyebrow">ОБЪЁМ ИЗ ЗАДАНИЯ</span>
-          <strong>
-            10 000<span> / месяц</span>
-          </strong>
-          <p>≈ 333 в календарный день. Среднее не описывает пики.</p>
-        </div>
-        <div>
-          <span className="eyebrow">ГЛАВНОЕ УЗКОЕ МЕСТО</span>
-          <p>
-            Не число серверов.
-            <br />
-            <em>
-              Качество контекста, проверка
-              <br />и интеграция в процесс.
-            </em>
-          </p>
-        </div>
-      </div>
-      <div className="roadmap">
-        <article>
-          <span className="mono">СЕЙЧАС / PHASE 1</span>
-          <h3>Локальный co-pilot</h3>
-          <p>
-            Один процесс, ручной ввод, review, bounded calls. При сбое —
-            человек.
-          </p>
-          <Pill tone="green">Реализовано</Pill>
-        </article>
-        <ArrowRight size={19} />
-        <article>
-          <span className="mono">ПОСЛЕ ПИЛОТА</span>
-          <h3>В рабочем процессе</h3>
-          <p>
-            Ticketing adapter, роли, сохранение истории, очереди. Решения
-            специалистов по SOP.
-          </p>
-          <Pill>План</Pill>
-        </article>
-        <ArrowRight size={19} />
-        <article>
-          <span className="mono">ПО МЕРЕ РОСТА</span>
-          <h3>Управляемый масштаб</h3>
-          <p>
-            Workers, rate limits, версия KB, поиск и калиброванные guardrails.
-          </p>
-          <Pill>План</Pill>
-        </article>
-      </div>
-      <Reference refInfo={refs.phases} />
-      <div className="section-top risk-heading">
-        <h2>Что может пойти не так</h2>
-        <span className="mono muted">СИМПТОМ → РЕАКЦИЯ → ПРОВЕРКА</span>
-      </div>
-      <div className="risk-list">
-        {risks.map((r) => (
-          <article className={open === r.id ? "expanded" : ""} key={r.id}>
-            <button
-              className="risk-toggle"
-              onClick={() => setOpen(open === r.id ? "" : r.id)}
-            >
-              <span className="mono">{r.id}</span>
-              <h3>{r.title}</h3>
-              <Pill tone={r.severity === "Критический" ? "amber" : "neutral"}>
-                {r.severity}
-              </Pill>
-              <Plus size={19} />
-            </button>
-            {open === r.id && (
-              <div className="risk-body">
-                <div>
-                  <span className="eyebrow">КАК ЗАМЕТИТЬ</span>
-                  <p>{r.symptom}</p>
-                </div>
-                <div>
-                  <span className="eyebrow">ЧТО ЕСТЬ СЕЙЧАС</span>
-                  <p>{r.now}</p>
-                </div>
-                <div>
-                  <span className="eyebrow">КАК РАЗВИВАТЬ</span>
-                  <p>{r.next}</p>
-                </div>
-                <div className="risk-test">
-                  <span className="eyebrow">ПРОВЕРКА</span>
-                  <p>{r.test}</p>
-                  <Reference refInfo={r.ref} />
-                </div>
-              </div>
-            )}
-          </article>
-        ))}
-      </div>
-      <div className="editorial-note">
-        <span className="eyebrow">ОГРАНИЧЕНИЕ ПЕРВОЙ ВЕРСИИ</span>
-        <p>
-          Нет авторизации и долговременного хранения.
-          <br />
-          <em>Это локальный инструмент, а не production rollout.</em>
+      <PageTitle title="Эксплуатация" />
+      <section className="panel section-block">
+        <h2>Масштабирование</h2>
+        <p className="section-description">
+          Исходный объём — 10 000 обращений в месяц, около 333 в день. Пиковая
+          нагрузка пока неизвестна.
         </p>
-        <p className="small">
-          Для реальных клиентских данных сначала согласовать доступ, хранение,
-          передачу провайдеру и роли reviewer.
-        </p>
-      </div>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Этап</th>
+                <th>Конфигурация</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong>Первая версия</strong>
+                </td>
+                <td>
+                  Локальный сервис, ручной ввод, проверка оператором.
+                  Одновременно до двух вызовов модели.
+                </td>
+                <td>
+                  <Pill tone="green">Реализовано</Pill>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Рабочий пилот</strong>
+                </td>
+                <td>
+                  API системы поддержки, авторизация и роли, постоянное
+                  хранение, очередь, измерение времени операторов.
+                </td>
+                <td>
+                  <Pill>План</Pill>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Рост нагрузки и базы</strong>
+                </td>
+                <td>
+                  Рабочие процессы из очереди, ограничения запросов и мониторинг
+                  задержек. Поиск и версии SOP по мере роста базы.
+                </td>
+                <td>
+                  <Pill>План</Pill>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section className="section-block">
+        <h2>Сбои и меры</h2>
+        <div className="risk-list">
+          {risks.map((r) => (
+            <details key={r.title}>
+              <summary>{r.title}</summary>
+              <dl className="risk-body">
+                <div>
+                  <dt>Проблема</dt>
+                  <dd>{r.symptom}</dd>
+                </div>
+                <div>
+                  <dt>В MVP</dt>
+                  <dd>{r.now}</dd>
+                </div>
+                <div>
+                  <dt>Следующий шаг</dt>
+                  <dd>{r.next}</dd>
+                </div>
+                <div>
+                  <dt>Проверка</dt>
+                  <dd>{r.test}</dd>
+                </div>
+              </dl>
+            </details>
+          ))}
+        </div>
+      </section>
+      <p className="small muted">
+        MVP работает локально, без авторизации и постоянного хранения. Перед
+        внедрением нужны правила доступа, хранения и передачи клиентских данных
+        провайдеру.
+      </p>
     </>
   );
 }
 
 function TestingPage({ onError }: { onError: (s: string) => void }) {
+  const checkNames: Record<string, string> = {
+    category: "Категория не соответствует ожидаемой",
+    route: "Маршрут не соответствует ожидаемому",
+    disposition: "Тип ответа не соответствует ожидаемому",
+    review_required: "Не назначена обязательная проверка",
+    schema_and_evidence: "Формат ответа или цитаты не прошли проверку",
+  };
   const [data, setData] = useState<{
     reports: EvalReport[];
     cases: EvalCase[];
   } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("run");
   const [reportKey, setReportKey] = useState("");
   useEffect(() => {
     api<{ reports: EvalReport[]; cases: EvalCase[] }>("/evaluations")
@@ -1323,6 +1061,7 @@ function TestingPage({ onError }: { onError: (s: string) => void }) {
             }
           : d,
       );
+      setReportKey(r.run_at);
     } catch (e) {
       onError((e as Error).message);
     } finally {
@@ -1331,245 +1070,248 @@ function TestingPage({ onError }: { onError: (s: string) => void }) {
   }
   return (
     <>
-      <PageTitle
-        index="05"
-        kicker="Проверка качества"
-        title={
-          <>
-            Измеряем отдельно.
-            <br />
-            <em>Улучшаем осознанно.</em>
-          </>
-        }
-        description="Технические проверки, смысл ответа и эффект на работу человека — три разных слоя. Успешный JSON не означает успешный клиентский ответ."
-      />
-      <div className="testing-head">
-        <div>
-          <div className="eyebrow">ПОСЛЕДНИЙ ПРОГОН</div>
-          <h2>
-            {report
-              ? `${report.passed} из ${report.total} технических сценариев`
-              : "Прогон ещё не выполнен"}
-          </h2>
-          <p>
-            {report
-              ? `${report.mode === "live" ? "Живая модель" : "Детерминированные шаблоны"} · ${report.model}`
-              : "Запустите smoke-проверку или полный набор из CLI."}
-          </p>
-        </div>
+      <PageTitle title="Тестирование">
         <button className="primary" onClick={run} disabled={busy}>
           {busy ? (
             <>
-              <Loader2 size={17} className="spin" />
-              Проверяем 8 случаев…
+              <Loader2 size={16} className="spin" />
+              Проверяем 8 сценариев…
             </>
           ) : (
             <>
-              <FlaskConical size={17} />
-              Прогнать 8 smoke-случаев
+              <FlaskConical size={16} />
+              Запустить 8 сценариев
             </>
           )}
         </button>
-      </div>
-      {data && data.reports.length > 1 && (
-        <div className="report-picker">
-          <label htmlFor="report-select">Показать сохранённый отчёт</label>
+      </PageTitle>
+      <section className="panel section-block">
+        <label className="report-picker" htmlFor="report-select">
+          Отчёт
           <select
             id="report-select"
             value={report?.run_at || ""}
             onChange={(e) => setReportKey(e.target.value)}
+            disabled={busy || !data}
           >
-            {data.reports.map((r) => (
+            {data?.reports.map((r) => (
               <option key={r.run_at} value={r.run_at}>
-                {r.mode === "live" ? "OpenAI Live" : "Demo"} ·{" "}
-                {r.subset === "all" ? "полный набор" : "smoke"} · {r.total}{" "}
-                случаев · {new Date(r.run_at).toLocaleTimeString("ru-RU")}
+                {r.mode === "live" ? "OpenAI" : "Демо"} · {r.total} сценариев ·{" "}
+                {r.subset === "all" ? "полный набор" : "smoke"} ·{" "}
+                {new Date(r.run_at).toLocaleString("ru-RU")}
               </option>
             ))}
           </select>
-        </div>
-      )}
-      {report && (
-        <>
-          <div className="eval-stats">
-            <div>
-              <span>Категории</span>
-              <strong>
-                {report.category_correct}/{report.total}
-              </strong>
+        </label>
+        {report ? (
+          <>
+            <div className="eval-stats">
+              <div>
+                <span>Проверки пройдены</span>
+                <strong>
+                  {report.passed}/{report.total}
+                </strong>
+              </div>
+              <div>
+                <span>Категории</span>
+                <strong>
+                  {report.category_correct}/{report.total}
+                </strong>
+              </div>
+              <div>
+                <span>Маршруты</span>
+                <strong>
+                  {report.route_correct}/{report.total}
+                </strong>
+              </div>
+              <div>
+                <span>p95 с очередью</span>
+                <strong>{(report.p95_latency_ms / 1000).toFixed(1)} с</strong>
+              </div>
+              <div>
+                <span>Расход API</span>
+                <strong>
+                  {report.mode === "live"
+                    ? `$${report.cost_usd.toFixed(3)}${report.cost_complete ? "" : " + неизвестный расход"}`
+                    : "Не измеряется"}
+                </strong>
+              </div>
             </div>
-            <div>
-              <span>Маршруты</span>
-              <strong>
-                {report.route_correct}/{report.total}
-              </strong>
-            </div>
-            <div>
-              <span>p95 до черновика</span>
-              <strong>{(report.p95_latency_ms / 1000).toFixed(1)} с</strong>
-            </div>
-            <div>
-              <span>Расход вызовов</span>
-              <strong>
-                {report.mode === "live"
-                  ? `$${report.cost_usd.toFixed(3)}${report.cost_complete ? "" : " + неизвестное"}`
-                  : "Не измеряется"}
-              </strong>
-            </div>
-          </div>
-          <div className="notice">
-            <AlertTriangle size={18} />
-            <span>
-              {report.note}{" "}
-              {report.mode === "demo" && "Это не оценка качества OpenAI."}
-            </span>
-          </div>
-        </>
-      )}
-      <div className="quality-layers">
-        <article>
-          <span className="mono">01 / АВТОМАТИЧЕСКИ</span>
-          <h3>Контракт и инварианты</h3>
-          <p>
-            Схема, source ID, точная цитата, маршрут, завершение ответа, ошибки
-            API. Проверяются кодом и тестами с подставным провайдером.
-          </p>
-        </article>
-        <article>
-          <span className="mono">02 / ЧЕЛОВЕКОМ</span>
-          <h3>Смысл и полнота</h3>
-          <p>
-            Все ли факты подтверждены? Не изменены ли сроки и условия? Нет ли
-            опасного решения? Пока семантическое качество не измерено.
-          </p>
-        </article>
-        <article>
-          <span className="mono">03 / В ПИЛОТЕ</span>
-          <h3>Польза в работе</h3>
-          <p>
-            Время review, принятие и правки, повторные обращения, стоимость
-            пригодного ответа. Synthetic-набор не даёт production ROI.
-          </p>
-        </article>
-      </div>
-      <div className="section-top">
-        <h2>Рубрика хорошего ответа</h2>
-        <Reference refInfo={refs.judge} />
-      </div>
-      <div className="rubric-list">
-        {rubric.map((r, i) => (
-          <div key={r.name}>
-            <span className="mono">0{i + 1}</span>
-            <strong>{r.name}</strong>
-            <p>{r.question}</p>
-            <small>{r.gate}</small>
-          </div>
-        ))}
-      </div>
-      <div className="section-top case-heading">
-        <div>
-          <h2>Корзина проверочных случаев</h2>
-          <p className="small muted">
-            32 synthetic-сценария · 24 dev / 8 первоначально отложенных. После
-            первого разбора holdout считается использованным.
-          </p>
-        </div>
-        <div className="segmented">
-          {["all", "dev", "holdout"].map((f) => (
-            <button
-              key={f}
-              className={filter === f ? "active" : ""}
-              onClick={() => setFilter(f)}
+            <p className="small muted">
+              {report.model}. Проверены категория, маршрут, формат ответа и
+              наличие цитат. Смысловое качество не измерено.
+              {report.mode === "demo" &&
+                " Отчёт проверяет шаблоны, а не модель."}
+            </p>
+            {report.subset === "smoke" && (
+              <p className="small muted">
+                8 сценариев из набора разработки. Этот прогон не заменяет полный
+                набор и независимую оценку.
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="muted">Загрузка отчётов…</p>
+        )}
+      </section>
+      <section className="section-block">
+        <div className="section-top">
+          <h2>Сценарии</h2>
+          <label>
+            <span className="sr-only">Набор сценариев</span>
+            <select
+              className="case-filter"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
             >
-              {f === "all" ? "Все" : f}
-            </button>
-          ))}
+              <option value="run">Текущий прогон</option>
+              <option value="all">Все 32</option>
+              <option value="dev">Разработка · 24</option>
+              <option value="holdout">Отложенные · 8</option>
+            </select>
+          </label>
         </div>
-      </div>
-      <div className="table-wrap">
-        <table className="case-table">
-          <thead>
-            <tr>
-              <th>ID / split</th>
-              <th>Сценарий</th>
-              <th>Ожидаемый маршрут</th>
-              <th>Последний результат</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.cases
-              .filter((c) => filter === "all" || c.split === filter)
-              .map((c) => {
-                const row = report?.rows.find((r) => r.id === c.id);
-                return (
-                  <tr key={c.id}>
-                    <td>
-                      <span className="mono">{c.id}</span>
-                      <small>{c.split}</small>
-                    </td>
-                    <td>
-                      <strong>{c.title}</strong>
-                      <p>{c.text}</p>
-                    </td>
-                    <td>
-                      {c.expected.queues.map((q) => queueNames[q]).join(" / ")}
-                    </td>
-                    <td>
-                      {row ? (
-                        <Pill tone={row.passed ? "green" : "amber"}>
-                          {row.passed
-                            ? "Тех. проверки пройдены"
-                            : "Нужен разбор"}
-                        </Pill>
-                      ) : (
-                        <span className="muted">Не прогонялся</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-          </tbody>
-        </table>
-      </div>
-      <div className="iteration-note">
-        <span className="eyebrow">ЦИКЛ УЛУЧШЕНИЯ</span>
-        <h3>Baseline → группа ошибок → одна гипотеза → проверка.</h3>
-        <p>
-          Не тюним промпт по holdout. Не превращаем ответ сильной модели в gold
-          без проверки. Judge калибруется отдельно; критическое нарушение не
-          перекрывается средним баллом.
+        <div className="table-wrap">
+          <table className="case-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Обращение</th>
+                <th>Ожидаемый маршрут</th>
+                <th>Результат</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.cases
+                .filter((c) =>
+                  filter === "run"
+                    ? report?.rows.some((r) => r.id === c.id)
+                    : filter === "all" || c.split === filter,
+                )
+                .map((c) => {
+                  const row = report?.rows.find((r) => r.id === c.id);
+                  return (
+                    <tr key={c.id}>
+                      <td className="mono">{c.id}</td>
+                      <td>
+                        <details>
+                          <summary>{c.title}</summary>
+                          <p>{c.text}</p>
+                        </details>
+                      </td>
+                      <td>
+                        {c.expected.queues
+                          .map((q) => queueNames[q])
+                          .join(" / ")}
+                      </td>
+                      <td>
+                        {row ? (
+                          <>
+                            <Pill tone={row.passed ? "green" : "amber"}>
+                              {row.passed ? "Пройдено" : "Ошибка"}
+                            </Pill>
+                            {!row.passed && (
+                              <details className="case-errors">
+                                <summary>Подробности</summary>
+                                {Object.entries(row.checks)
+                                  .filter(([, passed]) => !passed)
+                                  .map(([check]) => (
+                                    <p key={check}>
+                                      {checkNames[check] || check}
+                                    </p>
+                                  ))}
+                                {row.errors.map((e, i) => (
+                                  <p key={i}>{e.message}</p>
+                                ))}
+                              </details>
+                            )}
+                          </>
+                        ) : (
+                          <span className="muted">Нет в этом прогоне</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
+        </div>
+        <p className="small muted">
+          32 искусственных сценария: 24 для разработки, 8 первоначально
+          отложенных. Отложенные уже разобраны; для независимого сравнения нужен
+          новый набор.
         </p>
-        <Reference refInfo={refs.hypotheses} />
-      </div>
+      </section>
+      <details className="panel testing-plan">
+        <summary>План дальнейшего тестирования</summary>
+        <dl className="risk-body">
+          <div>
+            <dt>Автоматически</dt>
+            <dd>
+              Формат, цитаты, обязательные маршруты, запреты и сбои API.
+              Сервисные тесты с подставным провайдером.
+            </dd>
+          </div>
+          <div>
+            <dt>Экспертная оценка</dt>
+            <dd>
+              Новый набор обращений с ручной разметкой. Отдельно проверять
+              смысл, полноту и критические нарушения.
+            </dd>
+          </div>
+          <div>
+            <dt>В пилоте</dt>
+            <dd>
+              Время обработки с учётом проверки и правок, доля принятия,
+              повторные обращения и стоимость пригодного ответа.
+            </dd>
+          </div>
+        </dl>
+        <h3>Критерии экспертной оценки</h3>
+        <dl className="rubric-list">
+          {rubric.map((r) => (
+            <div key={r.name}>
+              <dt>{r.name}</dt>
+              <dd>{r.question}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="small muted">
+          Критическое нарушение блокирует принятие ответа независимо от
+          остальных оценок.
+        </p>
+      </details>
+      <p className="small muted">
+        Кнопка запускает запросы с серверной конфигурацией. При подключённой
+        модели вызовы оплачиваются через OpenRouter.
+      </p>
     </>
   );
 }
 
 function EconomyPage({ health }: { health: Health | null }) {
-  const [volume, setVolume] = useState(10000);
-  const [coverage, setCoverage] = useState(60);
-  const [acceptance, setAcceptance] = useState(80);
-  const [saved, setSaved] = useState(4);
-  const [hour, setHour] = useState(20);
-  const [waste, setWaste] = useState(0.5);
-  const [maintenance, setMaintenance] = useState(320);
-  const [infra, setInfra] = useState(100);
-  const [input, setInput] = useState(3200);
-  const [output, setOutput] = useState(500);
+  const [volume, setVolume] = useState(10000),
+    [coverage, setCoverage] = useState(60),
+    [acceptance, setAcceptance] = useState(80),
+    [saved, setSaved] = useState(4),
+    [hour, setHour] = useState(20),
+    [waste, setWaste] = useState(0.5),
+    [maintenance, setMaintenance] = useState(320),
+    [infra, setInfra] = useState(100),
+    [input, setInput] = useState(3200),
+    [output, setOutput] = useState(500);
   const q = coverage / 100,
     a = acceptance / 100;
   const hours = (volume * q * (a * saved - (1 - a) * waste)) / 60;
+  const inputPrice = health?.input_price ?? 2,
+    outputPrice = health?.output_price ?? 10;
   const apiCost =
-    ((volume *
-      (input * (health?.input_price || 2) +
-        output * (health?.output_price || 10))) /
-      1e6) *
-    1.1;
-  const opex = apiCost + maintenance + infra;
-  const net = hours * hour - opex;
+    ((volume * (input * inputPrice + output * outputPrice)) / 1e6) * 1.1;
+  const opex = apiCost + maintenance + infra,
+    net = hours * hour - opex;
   const fields = [
     {
-      label: "Тикетов / месяц",
+      label: "Обращений в месяц",
       value: volume,
       set: setVolume,
       step: 100,
@@ -1577,7 +1319,7 @@ function EconomyPage({ health }: { health: Health | null }) {
       max: 1000000,
     },
     {
-      label: "Покрытие черновиком, %",
+      label: "Покрытие базой, %",
       value: coverage,
       set: setCoverage,
       step: 5,
@@ -1585,7 +1327,7 @@ function EconomyPage({ health }: { health: Health | null }) {
       max: 100,
     },
     {
-      label: "Пригодных черновиков, %",
+      label: "Принятых черновиков, %",
       value: acceptance,
       set: setAcceptance,
       step: 5,
@@ -1593,7 +1335,7 @@ function EconomyPage({ health }: { health: Health | null }) {
       max: 100,
     },
     {
-      label: "Сэкономлено на принятом, мин",
+      label: "Экономия на принятом, мин",
       value: saved,
       set: setSaved,
       step: 0.5,
@@ -1601,7 +1343,7 @@ function EconomyPage({ health }: { health: Health | null }) {
       max: 30,
     },
     {
-      label: "Потрачено на отвергнутом, мин",
+      label: "Время на отклонённый, мин",
       value: waste,
       set: setWaste,
       step: 0.1,
@@ -1617,7 +1359,7 @@ function EconomyPage({ health }: { health: Health | null }) {
       max: 500,
     },
     {
-      label: "Input tokens / вызов",
+      label: "Входные токены на вызов",
       value: input,
       set: setInput,
       step: 100,
@@ -1625,7 +1367,7 @@ function EconomyPage({ health }: { health: Health | null }) {
       max: 50000,
     },
     {
-      label: "Output tokens / вызов",
+      label: "Выходные токены на вызов",
       value: output,
       set: setOutput,
       step: 100,
@@ -1633,7 +1375,7 @@ function EconomyPage({ health }: { health: Health | null }) {
       max: 10000,
     },
     {
-      label: "Инфраструктура / месяц, $",
+      label: "Инфраструктура в месяц, $",
       value: infra,
       set: setInfra,
       step: 25,
@@ -1641,7 +1383,7 @@ function EconomyPage({ health }: { health: Health | null }) {
       max: 10000,
     },
     {
-      label: "Сопровождение / месяц, $",
+      label: "Сопровождение в месяц, $",
       value: maintenance,
       set: setMaintenance,
       step: 40,
@@ -1661,76 +1403,74 @@ function EconomyPage({ health }: { health: Health | null }) {
     setInfra(100);
     setMaintenance(320);
   }
+  const renderFields = (items: typeof fields) => (
+    <div className="economy-fields">
+      {items.map((f) => (
+        <label key={f.label}>
+          {f.label}
+          <input
+            type="number"
+            value={f.value}
+            min={f.min}
+            max={f.max}
+            step={f.step}
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              if (Number.isFinite(n))
+                f.set(Math.max(f.min, Math.min(f.max, n)));
+            }}
+          />
+        </label>
+      ))}
+    </div>
+  );
   return (
     <>
-      <PageTitle
-        index="06"
-        kicker="Экономика"
-        title={
-          <>
-            Считаем время.
-            <br />
-            <em>Не впечатления.</em>
-          </>
-        }
-        description="Стоит ли запускать при нашем объёме? Измените допущения и посмотрите, когда проект окупает эксплуатацию — и когда перестаёт."
-      />
+      <PageTitle title="Экономика" />
+      <p className="section-description">
+        Сценарный расчёт для {health?.model || "openai/gpt-6.1-sol"}. Время,
+        покрытие и принятие ещё не измерены в работе поддержки.
+      </p>
       <div className="economy-layout">
-        <section className="economy-inputs">
+        <section className="panel economy-inputs">
           <div className="section-top">
-            <h2>Сценарные допущения</h2>
+            <h2>Допущения</h2>
             <button className="text-button" onClick={reset}>
               <RotateCcw size={14} />
               Сбросить
             </button>
           </div>
-          <div className="economy-fields">
-            {fields.map((f) => (
-              <label key={f.label}>
-                {f.label}
-                <input
-                  type="number"
-                  value={f.value}
-                  min={f.min}
-                  max={f.max}
-                  step={f.step}
-                  onChange={(e) => {
-                    const n = Number(e.target.value);
-                    if (Number.isFinite(n))
-                      f.set(Math.max(f.min, Math.min(f.max, n)));
-                  }}
-                />
-              </label>
-            ))}
-          </div>
+          {renderFields(fields.slice(0, 6))}
+          <details className="technical-details" open>
+            <summary>Расходы и токены</summary>
+            {renderFields(fields.slice(6))}
+          </details>
           <p className="small muted">
-            Экономия на принятом ответе уже включает проверку и правки.
-            Непокрытым тикетам не начисляется экономия. LLM-бюджет включает все
-            входящие и 10% резерв.
+            Экономия включает проверку и правки. API рассчитывается на все
+            обращения с резервом 10%. Тариф за 1 млн токенов: ${inputPrice} вход
+            / ${outputPrice} выход.
           </p>
         </section>
-        <section className={`economy-result ${net < 0 ? "negative" : ""}`}>
-          <div className="eyebrow">ЭКВИВАЛЕНТ ЦЕННОСТИ ВРЕМЕНИ / МЕСЯЦ</div>
+        <section
+          className={`panel economy-result ${net < 0 ? "negative" : ""}`}
+        >
+          <h2>Результат за месяц</h2>
           <div className="net-value">
             {net < 0 ? "−" : "+"}$
             {Math.abs(net).toLocaleString("en-US", {
               maximumFractionDigits: 0,
             })}
           </div>
-          <p>
-            {net >= 0
-              ? "При этих допущениях ценность сохранённого времени покрывает эксплуатацию."
-              : "При этих допущениях расходы превышают ценность сэкономленного времени."}
-          </p>
-          <dl>
+          <p className="net-label">Ценность времени за вычетом расходов</p>
+          <dl className="data-list">
             <div>
-              <dt>Чистое сохранённое время</dt>
+              <dt>Сэкономлено времени</dt>
               <dd>
                 {hours.toLocaleString("ru-RU", { maximumFractionDigits: 1 })} ч
               </dd>
             </div>
             <div>
-              <dt>Ценность этого времени</dt>
+              <dt>Ценность времени</dt>
               <dd>
                 $
                 {(hours * hour).toLocaleString("en-US", {
@@ -1739,78 +1479,52 @@ function EconomyPage({ health }: { health: Health | null }) {
               </dd>
             </div>
             <div>
-              <dt>LLM с резервом</dt>
+              <dt>API с резервом</dt>
               <dd>${apiCost.toFixed(2)}</dd>
             </div>
             <div>
-              <dt>Инфраструктура + сопровождение</dt>
+              <dt>Инфраструктура и сопровождение</dt>
               <dd>${(infra + maintenance).toFixed(0)}</dd>
             </div>
             <div>
-              <dt>Полный monthly OPEX</dt>
+              <dt>Всего расходов</dt>
               <dd>${opex.toFixed(2)}</dd>
             </div>
           </dl>
-          <div className="capacity-note">
-            Ценность мощности команды ≠ сокращение зарплатного фонда. Денежный
-            эффект требует предотвращённого найма или другого изменения
-            процесса.
-          </div>
-        </section>
-      </div>
-      <div className="formula">
-        <span className="eyebrow">ФОРМУЛА</span>
-        <code>N × q × [a × saved − (1 − a) × wasted] / 60</code>
-        <p>
-          Это часы после вычета времени на отвергнутые черновики. Разовые
-          расходы внедрения, дополнительные лицензии и on-call добавить
-          отдельно.
-        </p>
-      </div>
-      <div className="decision-columns">
-        <section>
-          <span className="eyebrow">ПРЕДВАРИТЕЛЬНОЕ РЕШЕНИЕ</span>
-          <h3>Ограниченный пилот.</h3>
           <p>
-            Сравнить ручную обработку и assisted-режим на сопоставимых темах и
-            языках. Измерять active handling time, edit / reject, повторные
-            обращения и обязательные маршруты.
+            {net >= 0
+              ? "При этих допущениях эксплуатация окупается за счёт времени команды."
+              : "При этих допущениях эксплуатация не окупается."}
           </p>
-          <Reference refInfo={refs.money} />
-        </section>
-        <section>
-          <span className="eyebrow">ПРАЙС И РЕАЛЬНЫЙ РАСХОД</span>
-          <h3>Сценарий — не счёт.</h3>
-          <p>
-            Тарифы из серверных настроек: ${health?.input_price || 2} input / $
-            {health?.output_price || 10} output за 1M токенов. При смене модели
-            пересчитать. В живом trace отдельно показывается reported cost, если
-            его вернул OpenRouter.
+          <p className="small muted">
+            Это высвобождённое время, а не подтверждённая денежная экономия.
+            Разовые расходы внедрения не учтены.
           </p>
-          <a
-            className="reference"
-            href="https://openrouter.ai/openai/gpt-6.1-sol"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Модель и тариф OpenRouter
-            <ArrowUpRight size={13} />
-          </a>
         </section>
       </div>
-      <div className="editorial-note">
-        <span className="eyebrow">ЧЕГО МЫ ПОКА НЕ ЗНАЕМ</span>
+      <section className="panel section-block recommendation">
+        <h2>Рекомендация</h2>
         <p>
-          Реальные AHT, acceptance и покрытие.
-          <br />
-          <em>Модель может помочь — или добавить работу.</em>
+          Пилот с выбранной моделью OpenAI и обязательной проверкой оператором.
+          Сравнить с ручной обработкой на сопоставимых обращениях; затем
+          проверить более дешёвую модель по качеству и общей стоимости.
         </p>
-        <Reference refInfo={refs.human} />
-      </div>
-      <DocumentDetails
-        name="economy"
-        label="Исходный business case: формулы и чувствительность"
-      />
+      </section>
+      <details className="technical-details">
+        <summary>Формула расчёта</summary>
+        <p>
+          Часы = обращения × покрытие × [принятие × экономия − (1 − принятие) ×
+          время на отклонённый] / 60.
+        </p>
+        <a
+          href={`https://openrouter.ai/${health?.model || "openai/gpt-6.1-sol"}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Модель и тариф OpenRouter
+          <ArrowUpRight size={13} />
+        </a>
+      </details>
     </>
   );
 }
