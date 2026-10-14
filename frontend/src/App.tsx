@@ -30,7 +30,8 @@ import {
   type EvalReport,
   type EvalCase,
 } from "./types";
-import { pipeline, extensions, risks, rubric } from "./guide";
+import { risks, rubric } from "./guide";
+import { ArchitectureContent, FailoverPlan } from "./Architecture";
 
 type View =
   | "workspace"
@@ -844,81 +845,7 @@ function ArchitecturePage() {
   return (
     <>
       <PageTitle title="Как устроено" />
-      <section className="panel section-block">
-        <h2>Обработка обращения</h2>
-        <ol className="pipeline-list">
-          {pipeline.map((p) => (
-            <li key={p.name}>
-              <h3>{p.name}</h3>
-              <p>{p.detail}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
-      <div className="two-columns">
-        <section className="panel section-block">
-          <h2>Стек</h2>
-          <dl className="data-list">
-            <div>
-              <dt>Интерфейс</dt>
-              <dd>React + Vite</dd>
-            </div>
-            <div>
-              <dt>Сервис</dt>
-              <dd>Python · FastAPI · Pydantic</dd>
-            </div>
-            <div>
-              <dt>LLM</dt>
-              <dd>OpenAI через OpenRouter</dd>
-            </div>
-            <div>
-              <dt>Контекст</dt>
-              <dd>4 страницы целиком</dd>
-            </div>
-            <div>
-              <dt>Хранение решений</dt>
-              <dd>Память процесса</dd>
-            </div>
-          </dl>
-        </section>
-        <section className="panel section-block">
-          <h2>Правила ответа</h2>
-          <ul className="plain-list">
-            <li>Торговые рекомендации отклоняются.</li>
-            <li>Жалобы, KYC и AML передаются специалисту.</li>
-            <li>Условия, комиссии и сроки приводятся только из базы.</li>
-            <li>Если данных нет — ответ сообщает об этом.</li>
-          </ul>
-        </section>
-      </div>
-      <section className="section-block">
-        <h2>Планируемые расширения</h2>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Расширение</th>
-                <th>Когда и что добавить</th>
-                <th>Как проверить</th>
-              </tr>
-            </thead>
-            <tbody>
-              {extensions.map((e) => (
-                <tr key={e.title}>
-                  <td>
-                    <strong>{e.title}</strong>
-                  </td>
-                  <td>
-                    <span className="muted small">{e.trigger}</span>
-                    <p>{e.change}</p>
-                  </td>
-                  <td>{e.proof}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <ArchitectureContent />
     </>
   );
 }
@@ -1007,6 +934,7 @@ function OperationsPage() {
                   <dd>{r.test}</dd>
                 </div>
               </dl>
+              {r.title === "Модель недоступна" && <FailoverPlan />}
             </details>
           ))}
         </div>
@@ -1264,6 +1192,15 @@ function TestingPage({ onError }: { onError: (s: string) => void }) {
             <dd>
               Время обработки с учётом проверки и правок, доля принятия,
               повторные обращения и стоимость пригодного ответа.
+            </dd>
+          </div>
+          <div>
+            <dt>Планируемые расширения</dt>
+            <dd>
+              Поиск: полнота найденных фрагментов и ранжирование отдельно от
+              ответа. Вторая модель: пропуски нарушений и ложные блокировки по
+              экспертной разметке. Резервы: сбои каждой модели, провайдера и
+              шлюза, лимит попыток и откат после регрессии.
             </dd>
           </div>
         </dl>

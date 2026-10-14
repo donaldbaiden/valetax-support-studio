@@ -8,7 +8,7 @@ The user explicitly selected a web MVP, no Model Context Protocol server; Python
 
 One model call returns a strict structured output. The server validates its schema, finish reason, citation source and excerpt membership. Business routing is code-owned; every reply requires review and specialist queues cannot be approved by the ordinary reviewer action. A small adapter controls model configuration, timeout and a maximum of one retry for selected transient HTTP errors. The model has no tools or write permissions.
 
-The React app exposes six surfaces: ticket workbench, original KB and defects, architecture and extension points, scale/operations, evaluation, and an interactive economic scenario. Architecture and operations distinguish implemented functionality from proposed extensions. The information design follows IBM Carbon principles and uses locally packaged IBM Plex fonts, with a restrained editorial treatment. It is an adaptation, not a claim of Carbon certification or an exact copy of its components.
+The React app exposes six surfaces: ticket workbench, original KB and defects, architecture and extension points, scale/operations, evaluation, and an interactive economic scenario. Architecture and operations distinguish implemented functionality from proposed extensions. The information design follows IBM Carbon principles and uses locally packaged IBM Plex fonts, with compact operational screens and expandable details. It is an adaptation, not a claim of Carbon certification or an exact copy of its components.
 
 ## Telegram practices applied
 
@@ -56,6 +56,6 @@ The report does not claim measured semantic correctness, advice-violation freque
 
 ## Next extension, only with a measured reason
 
-Ticketing/auth/persistence → event idempotency and roles; growing KB → applicability-aware hybrid retrieval; observed semantic misses → calibrated guardrail; observed traffic peaks → durable queue/workers/backoff; model cost optimization → same eval plus measured operator review time. Each extension is described inside the web application with its trigger, verification and Telegram source.
+Ticketing/auth/persistence → event idempotency and roles; growing KB → applicability-aware hybrid retrieval; observed semantic misses → calibrated guardrail; observed traffic peaks → durable queue/workers/backoff; model cost optimization → same eval plus measured operator review time. The web application shows current and planned processes as interactive diagrams, with triggers and verification criteria. Source attribution remains in repository documentation rather than in the customer-facing UI. See [architecture extensions](architecture_extensions.md) for the diagrams studied, retrieval/judge metrics and failover/rollback plan. These are proposals; runtime still uses one OpenAI model with no automatic model/provider fallback.
 
 No remote deployment or GitHub publication was requested for this locally approved version. The repository is initialized locally and ready for an approved remote destination.
