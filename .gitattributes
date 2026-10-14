@@ -1,0 +1,2 @@
+# Keep public source snapshots byte-for-byte, including original line endings.
+data/kb/*.html -text
