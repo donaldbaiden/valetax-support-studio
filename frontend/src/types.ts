@@ -78,15 +78,24 @@ export type KB = {
     chunks: { id: string; text: string }[];
   }[];
 };
+export type EvalExpected = {
+  categories: string[];
+  queues: string[];
+  dispositions: string[];
+  languages?: string[];
+  urgencies?: string[];
+  sentiments?: string[];
+};
 export type EvalCase = {
   id: string;
   title: string;
   text: string;
   split: string;
   smoke: boolean;
-  expected: { categories: string[]; queues: string[]; dispositions: string[] };
+  expected: EvalExpected;
 };
 export type EvalReport = {
+  run_id?: string;
   run_at: string;
   mode: string;
   model: string;
@@ -98,6 +107,13 @@ export type EvalReport = {
   cost_usd: number;
   cost_complete: boolean;
   eval_version?: string;
+  kb_version?: string;
+  manifest?: {
+    prompt_version: string;
+    dataset_sha256: string;
+    selected_case_ids: string[];
+    [key: string]: unknown;
+  };
   unique_cases?: number;
   repeats?: number;
   consistent_cases?: number;
@@ -112,6 +128,20 @@ export type EvalReport = {
     passed: boolean;
     checks: Record<string, boolean>;
     errors: { code: string; message: string }[];
+    ticket?: string;
+    expected?: EvalExpected;
+    actual?: {
+      category: string;
+      queue: string;
+      disposition: string;
+      language?: string;
+      urgency?: string;
+      sentiment?: string;
+    };
+    latency_ms?: number;
+    queue_wait_ms?: number;
+    provider_latency_ms?: number;
+    cost_usd?: number | null;
     trial?: number;
     output?: TicketResult["output"];
     sources?: TicketResult["sources"];
