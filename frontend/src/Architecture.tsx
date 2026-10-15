@@ -193,6 +193,7 @@ export function ArchitectureContent() {
     architectureScenarios.find((s) => s.id === tab) || architectureScenarios[0];
   const defaults: Record<string, string> = {
     current: "llm",
+    precheck: "triage",
     retrieval: "fusion",
     review: "verifier",
   };
