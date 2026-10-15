@@ -1510,3 +1510,86 @@ td p {
     padding: 11px 12px;
   }
 }
+
+.risk-incident {
+  margin: 18px 0 15px;
+  font-size: 13px;
+  max-width: 900px;
+}
+.risk-incident h3,
+.risk-verification h3 {
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+.risk-incident p {
+  color: #5f7064;
+}
+.risk-causes-table {
+  table-layout: fixed;
+}
+.risk-causes-table th:first-child {
+  width: 36%;
+}
+.risk-causes-table td {
+  line-height: 1.65;
+  padding: 14px;
+}
+.risk-causes-table th {
+  padding: 10px 14px;
+}
+.risk-causes-table td:first-child {
+  color: #56695a;
+}
+.risk-mobile-label {
+  display: none;
+}
+.risk-implementation {
+  padding-top: 17px;
+}
+.risk-verification {
+  font-size: 13px;
+  border-top: 1px solid var(--line);
+  margin-top: 17px;
+  padding-top: 15px;
+}
+.risk-verification p {
+  color: var(--muted);
+}
+.risk-failover > .failover-plan {
+  border-top: 0;
+  margin-top: 0;
+  padding-top: 10px;
+}
+@media (max-width: 640px) {
+  .risk-causes {
+    overflow: visible;
+  }
+  .risk-causes-table,
+  .risk-causes-table tbody,
+  .risk-causes-table tr,
+  .risk-causes-table td {
+    display: block;
+    width: 100%;
+  }
+  .risk-causes-table thead {
+    display: none;
+  }
+  .risk-causes-table tr + tr {
+    border-top: 1px solid var(--line);
+  }
+  .risk-causes-table td {
+    border-bottom: 0;
+    padding: 12px 14px;
+  }
+  .risk-causes-table td + td {
+    padding-top: 0;
+  }
+  .risk-mobile-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: #7c897e;
+    margin-bottom: 4px;
+  }
+}

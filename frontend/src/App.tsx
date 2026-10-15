@@ -911,30 +911,61 @@ function OperationsPage() {
         </div>
       </section>
       <section className="section-block">
-        <h2>Сбои и меры</h2>
+        <h2>Проблемы и действия</h2>
         <div className="risk-list">
           {risks.map((r) => (
-            <details key={r.title}>
+            <details key={r.id}>
               <summary>{r.title}</summary>
-              <dl className="risk-body">
+              <div className="risk-incident">
+                <h3>Что происходит</h3>
+                <p>{r.symptom}</p>
+              </div>
+              <div className="table-wrap risk-causes">
+                <table className="risk-causes-table">
+                  <thead>
+                    <tr>
+                      <th>Возможная причина</th>
+                      <th>Что делать</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {r.causes.map((c) => (
+                      <tr key={c.reason}>
+                        <td>
+                          <span className="risk-mobile-label">
+                            Возможная причина
+                          </span>
+                          {c.reason}
+                        </td>
+                        <td>
+                          <span className="risk-mobile-label">Что делать</span>
+                          {c.action}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <dl className="risk-body risk-implementation">
                 <div>
-                  <dt>Проблема</dt>
-                  <dd>{r.symptom}</dd>
+                  <dt>Уже есть в MVP</dt>
+                  <dd>{r.implemented}</dd>
                 </div>
                 <div>
-                  <dt>В MVP</dt>
-                  <dd>{r.now}</dd>
-                </div>
-                <div>
-                  <dt>Следующий шаг</dt>
-                  <dd>{r.next}</dd>
-                </div>
-                <div>
-                  <dt>Проверка</dt>
-                  <dd>{r.test}</dd>
+                  <dt>Нужно добавить</dt>
+                  <dd>{r.missing}</dd>
                 </div>
               </dl>
-              {r.title === "Модель недоступна" && <FailoverPlan />}
+              <div className="risk-verification">
+                <h3>Как проверить</h3>
+                <p>{r.test}</p>
+              </div>
+              {r.id === "provider" && (
+                <details className="technical-details risk-failover">
+                  <summary>Схема резервов и отката</summary>
+                  <FailoverPlan />
+                </details>
+              )}
             </details>
           ))}
         </div>

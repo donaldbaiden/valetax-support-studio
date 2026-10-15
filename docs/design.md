@@ -8,4 +8,6 @@ The primary screen contains a ticket input, sample selector, draft, classificati
 
 There are no slogans, editorial headings, Telegram links, research documents, decorative statistics or unsupported quality claims in the interface. The original research and attribution remain in repository documents.
 
+Operational risks use concrete incidents and paired cause/action rows. Each scenario separately states the existing MVP behavior, missing controls and a reproducible verification step. Provider failover diagrams expand within the corresponding scenario.
+
 On narrow screens navigation moves into a menu, panels stack, and wide tables scroll within their container. Reduced-motion preferences are respected.
