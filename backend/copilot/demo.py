@@ -134,7 +134,17 @@ def demo_output(text, kb):
         disposition = "abstain"
     elif verification:
         flags.add("kyc_aml")
-        if re.search(r"time|long|срок|сколько|48", t):
+        if re.search(
+            r"\b(has|is|was) my (account|verification|kyc)\b|my (kyc|verification) (status|result)|мо[йя].{0,20}(уже|прош[её]л|одобрен|подтвержд[её]н)",
+            t,
+        ):
+            draft = tr(
+                "В доступной базе нет статуса вашей проверки. Его нужно проверить специалисту во внутренней системе; я не могу подтвердить, что счёт верифицирован.",
+                "The knowledge base does not contain your verification status. A specialist must check it in the internal system; I cannot confirm that your account is verified.",
+            )
+            unknowns = [tr("Фактический статус вашей проверки.", "Your actual verification status.")]
+            disposition = "abstain"
+        elif re.search(r"time|long|срок|сколько|48", t):
             evidence = "Account opening and document verification will be completed within 48 hours."
             draft = tr(
                 "На странице открытия счёта опубликован срок до 48 часов для открытия и проверки документов. Это справочная информация, а не подтверждение срока или результата вашей конкретной проверки. Специалист должен проверить ваш случай.",

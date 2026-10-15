@@ -7,13 +7,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 from copilot.config import Settings, ROOT
 from copilot.kb import KnowledgeBase
 from copilot.service import CopilotService
-from copilot.evaluation import evaluate
+from copilot.evaluation import evaluate, save_report
 
 
 async def main():
     p = argparse.ArgumentParser()
     p.add_argument("--mode", choices=["demo", "live"], default="demo")
-    p.add_argument("--subset", choices=["smoke", "all"], default="all")
+    p.add_argument("--subset", choices=["smoke", "dev", "all"], default="all")
+    p.add_argument("--repeats", type=int, choices=range(1, 6), default=1)
     a = p.parse_args()
     settings = Settings.from_env()
     if a.mode == "live" and not settings.key:
@@ -22,10 +23,9 @@ async def main():
         CopilotService(settings, KnowledgeBase()),
         "demo" if a.mode == "demo" else "configured",
         a.subset,
+        repeats=a.repeats,
     )
-    out = ROOT / f"reports/eval_{result['mode']}.json"
-    out.parent.mkdir(exist_ok=True)
-    out.write_text(json.dumps(result, ensure_ascii=False, indent=2))
+    save_report(result)
     print(
         json.dumps(
             {k: v for k, v in result.items() if k != "rows"},

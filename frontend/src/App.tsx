@@ -627,7 +627,7 @@ function ResultPanel({
             <dt>Входные / выходные токены</dt>
             <dd>
               {r.trace.usage
-                ? `${r.trace.usage.input_tokens} / ${r.trace.usage.output_tokens}`
+                ? `${r.trace.usage.input_tokens ?? "—"} / ${r.trace.usage.output_tokens ?? "—"}`
                 : "Нет данных"}
             </dd>
           </div>
@@ -932,6 +932,9 @@ function TestingPage({ onError }: { onError: (s: string) => void }) {
     disposition: "Тип ответа не соответствует ожидаемому",
     review_required: "Не назначена обязательная проверка",
     schema_and_evidence: "Формат ответа или цитаты не прошли проверку",
+    language: "Язык не соответствует ожидаемому",
+    urgency: "Срочность не соответствует ожидаемой",
+    sentiment: "Тональность не соответствует ожидаемой",
   };
   const [data, setData] = useState<{
     reports: EvalReport[];
@@ -1001,9 +1004,15 @@ function TestingPage({ onError }: { onError: (s: string) => void }) {
           >
             {data?.reports.map((r) => (
               <option key={r.run_at} value={r.run_at}>
-                {r.mode === "live" ? "OpenAI" : "Демо"} · {r.total} сценариев ·{" "}
-                {r.subset === "all" ? "полный набор" : "smoke"} ·{" "}
-                {new Date(r.run_at).toLocaleString("ru-RU")}
+                {r.mode === "live" ? "OpenAI" : "Демо"} ·{" "}
+                {r.unique_cases ?? r.total} сценариев
+                {(r.repeats ?? 1) > 1 ? ` × ${r.repeats} повтора` : ""} ·{" "}
+                {r.subset === "all"
+                  ? "полный набор"
+                  : r.subset === "dev"
+                    ? "разработка"
+                    : "smoke"}{" "}
+                · {new Date(r.run_at).toLocaleString("ru-RU")}
               </option>
             ))}
           </select>
@@ -1048,6 +1057,31 @@ function TestingPage({ onError }: { onError: (s: string) => void }) {
               {report.mode === "demo" &&
                 " Отчёт проверяет шаблоны, а не модель."}
             </p>
+            {report.classification_checks ? (
+              <p className="small muted">
+                {Object.entries(report.classification_checks)
+                  .map(
+                    ([field, score]) =>
+                      `${({ language: "Язык", urgency: "Срочность", sentiment: "Тональность" } as Record<string, string>)[field] || field}: ${score.correct}/${score.total}`,
+                  )
+                  .join(" · ")}
+                . Проверяются только размеченные случаи.
+                {report.rows.some((row) => row.cost_basis === "estimate") &&
+                  " Часть расхода оценена по заданным тарифам."}
+              </p>
+            ) : (
+              <p className="small muted">
+                Язык, срочность и тональность в этом отчёте автоматически не
+                проверялись.
+              </p>
+            )}
+            {(report.repeats ?? 1) > 1 && (
+              <p className="small muted">
+                Все технические повторы пройдены у {report.consistent_cases}/
+                {report.unique_cases} сценариев. Это не оценка смысловой
+                корректности.
+              </p>
+            )}
             {report.subset === "smoke" && (
               <p className="small muted">
                 8 сценариев из набора разработки. Этот прогон не заменяет полный
@@ -1094,7 +1128,9 @@ function TestingPage({ onError }: { onError: (s: string) => void }) {
                     : filter === "all" || c.split === filter,
                 )
                 .map((c) => {
-                  const row = report?.rows.find((r) => r.id === c.id);
+                  const caseRows =
+                    report?.rows.filter((r) => r.id === c.id) || [];
+                  const row = caseRows.find((r) => !r.passed) || caseRows[0];
                   return (
                     <tr key={c.id}>
                       <td className="mono">{c.id}</td>
@@ -1102,6 +1138,55 @@ function TestingPage({ onError }: { onError: (s: string) => void }) {
                         <details>
                           <summary>{c.title}</summary>
                           <p>{c.text}</p>
+                          {row?.output ? (
+                            <div className="eval-output">
+                              <strong>
+                                Черновик
+                                {caseRows.length > 1
+                                  ? ` · повтор ${row.trial}`
+                                  : ""}
+                              </strong>
+                              <p>{row.output.draft}</p>
+                              {row.output.claims.map((claim, index) => (
+                                <blockquote key={index}>
+                                  <p>{claim.text}</p>
+                                  <p>«{claim.evidence}»</p>
+                                  <span className="small muted">
+                                    {row.sources?.find(
+                                      (source) => source.id === claim.source_id,
+                                    )?.title || "Источник"}
+                                  </span>
+                                </blockquote>
+                              ))}
+                              {row.sources?.map((source) => (
+                                <p key={source.id}>
+                                  <a
+                                    href={source.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    {source.title}
+                                    <ExternalLink size={12} />
+                                  </a>
+                                </p>
+                              ))}
+                              {row.output.unknowns.length > 0 && (
+                                <p>
+                                  Неизвестно: {row.output.unknowns.join("; ")}
+                                </p>
+                              )}
+                              <p className="small muted">
+                                Смысл и полнота ещё требуют экспертной оценки.
+                                {caseRows.length > 1 && !row.passed
+                                  ? " Показан первый неуспешный повтор."
+                                  : ""}
+                              </p>
+                            </div>
+                          ) : row ? (
+                            <p className="small muted">
+                              Текст ответа в этом старом отчёте не сохранён.
+                            </p>
+                          ) : null}
                         </details>
                       </td>
                       <td>
@@ -1115,6 +1200,12 @@ function TestingPage({ onError }: { onError: (s: string) => void }) {
                             <Pill tone={row.passed ? "green" : "amber"}>
                               {row.passed ? "Пройдено" : "Ошибка"}
                             </Pill>
+                            {caseRows.length > 1 && (
+                              <p className="small muted">
+                                {caseRows.filter((r) => r.passed).length}/
+                                {caseRows.length} повторов
+                              </p>
+                            )}
                             {!row.passed && (
                               <details className="case-errors">
                                 <summary>Подробности</summary>
@@ -1161,14 +1252,19 @@ function TestingPage({ onError }: { onError: (s: string) => void }) {
             <dt>Экспертная оценка</dt>
             <dd>
               Новый набор обращений с ручной разметкой. Отдельно проверять
-              смысл, полноту и критические нарушения.
+              смысл, полноту и критические нарушения. Сначала согласовать
+              критерии на небольшой общей разметке; спорные случаи разрешает
+              владелец процесса. Принятие черновика само по себе не доказывает
+              правильность.
             </dd>
           </div>
           <div>
             <dt>В пилоте</dt>
             <dd>
               Время обработки с учётом проверки и правок, доля принятия,
-              повторные обращения и стоимость пригодного ответа.
+              повторные обращения и стоимость пригодного ответа. Для проверки
+              качества брать и проблемные, и случайные обычные обращения:
+              уверенно написанные ошибки тоже должны попадать в выборку.
             </dd>
           </div>
           <div>
@@ -1177,10 +1273,21 @@ function TestingPage({ onError }: { onError: (s: string) => void }) {
               Поиск: полнота найденных фрагментов и ранжирование отдельно от
               ответа. Вторая модель: пропуски нарушений и ложные блокировки по
               экспертной разметке. Резервы: сбои каждой модели, провайдера и
-              шлюза, лимит попыток и откат после регрессии.
+              шлюза, лимит попыток и откат после регрессии. Инструменты:
+              правильный выбор, аргументы, обработка ошибок и фактический
+              результат действия; отсутствие вызова там, где он не нужен.
             </dd>
           </div>
         </dl>
+        <h3>Перед изменением модели или процесса</h3>
+        <p className="small muted">
+          Зафиксировать конфигурацию и новый независимый набор. Для критических
+          и неоднозначных сценариев выполнить несколько повторов, учитывать
+          неуспешные попытки. Сначала проверить без действий в рабочих системах,
+          затем провести ограниченный пилот с оператором. Критическое нарушение
+          блокирует выпуск; пороги качества, задержки и расходов согласовать до
+          сравнения.
+        </p>
         <h3>Критерии экспертной оценки</h3>
         <dl className="rubric-list">
           {rubric.map((r) => (

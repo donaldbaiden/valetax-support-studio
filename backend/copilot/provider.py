@@ -104,15 +104,17 @@ class OpenRouterProvider:
             if not isinstance(content, str):
                 raise ProviderError("provider_empty")
             output = ModelOutput.model_validate_json(content)
-            usage = data.get("usage", {})
+            usage = data.get("usage") or {}
+            if not isinstance(usage, dict):
+                usage = {}
             return output, {
-                "input_tokens": usage.get("prompt_tokens", 0),
-                "output_tokens": usage.get("completion_tokens", 0),
+                "input_tokens": usage.get("prompt_tokens"),
+                "output_tokens": usage.get("completion_tokens"),
                 "reported_cost_usd": usage.get("cost"),
                 "provider_request_id": data.get("id"),
                 "attempts": attempt + 1,
             }
         except ProviderError:
             raise
-        except (KeyError, ValueError, TypeError, IndexError):
+        except (KeyError, ValueError, TypeError, IndexError, AttributeError):
             raise ProviderError("invalid_output") from None

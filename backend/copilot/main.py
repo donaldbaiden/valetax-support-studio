@@ -9,7 +9,7 @@ from .config import Settings, ROOT
 from .kb import KnowledgeBase
 from .models import TicketRequest, ReviewRequest
 from .service import CopilotService
-from .evaluation import evaluate, cases
+from .evaluation import evaluate, cases, save_report
 from .safety import unsafe_draft
 
 settings = Settings.from_env()
@@ -114,9 +114,7 @@ async def smoke():
     eval_busy = True
     try:
         report = await evaluate(service, subset="smoke", mode="configured")
-        path = ROOT / f"reports/eval_{report['mode']}.json"
-        path.parent.mkdir(exist_ok=True)
-        path.write_text(json.dumps(report, ensure_ascii=False, indent=2))
+        save_report(report)
         last_eval = time.monotonic()
         return report
     finally:

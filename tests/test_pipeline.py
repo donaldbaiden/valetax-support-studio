@@ -164,3 +164,16 @@ async def test_partial_requires_explicit_unknowns(kb):
         "How do I deposit?"
     )
     assert r["checks"]["errors"][0]["code"] == "missing_unknowns"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("text", [
+    "Has my account already been verified?",
+    "Мой счёт уже верифицирован?",
+])
+async def test_demo_does_not_substitute_a_procedure_for_actual_kyc_status(kb, text):
+    result = await CopilotService(Settings(mode="demo"), kb).process(text, "demo")
+    assert result["queue"] == "compliance"
+    assert result["output"]["disposition"] == "abstain"
+    assert result["output"]["unknowns"]
+    assert not result["output"]["claims"]

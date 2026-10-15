@@ -892,6 +892,19 @@ td p {
 .extension-capabilities .plain-list {
   margin: 0;
 }
+.eval-output {
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+  padding-top: 12px;
+}
+.eval-output blockquote {
+  margin: 12px 0;
+  padding-left: 12px;
+  border-left: 2px solid #b7c9b8;
+}
+.eval-output strong {
+  font-weight: 500;
+}
 .report-picker {
   display: flex;
   align-items: center;

@@ -104,3 +104,22 @@ async def test_region_failure_has_specific_safe_error(monkeypatch):
         await OpenRouterProvider(Settings(key="unit")).generate(
             "Ticket", KnowledgeBase()
         )
+
+
+@pytest.mark.asyncio
+async def test_absent_usage_is_not_zero_tokens(monkeypatch):
+    kb = KnowledgeBase()
+    mock_client(monkeypatch, lambda r: httpx.Response(200, json={
+        "choices": [{"finish_reason": "stop", "message": {"content": valid_output(kb).model_dump_json()}}]
+    }))
+    _, usage = await OpenRouterProvider(Settings(key="unit")).generate("Ticket", kb)
+    assert usage["input_tokens"] is None
+    assert usage["output_tokens"] is None
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("response", [[], {"choices": [None]}, {"choices": [{"message": None}]}])
+async def test_malformed_envelope_fails_closed(monkeypatch, response):
+    mock_client(monkeypatch, lambda r: httpx.Response(200, json=response))
+    with pytest.raises(ProviderError, match="invalid_output"):
+        await OpenRouterProvider(Settings(key="unit")).generate("Ticket", KnowledgeBase())

@@ -48,8 +48,8 @@ export type TicketResult = {
     prompt_version: string;
     latency_ms: number;
     usage: {
-      input_tokens: number;
-      output_tokens: number;
+      input_tokens: number | null;
+      output_tokens: number | null;
       attempts: number;
     } | null;
     cost_usd: number | null;
@@ -96,6 +96,11 @@ export type EvalReport = {
   route_correct: number;
   cost_usd: number;
   cost_complete: boolean;
+  eval_version?: string;
+  unique_cases?: number;
+  repeats?: number;
+  consistent_cases?: number;
+  classification_checks?: Record<string, { correct: number; total: number }>;
   p50_latency_ms: number;
   p95_latency_ms: number;
   semantic_quality: string;
@@ -106,6 +111,10 @@ export type EvalReport = {
     passed: boolean;
     checks: Record<string, boolean>;
     errors: { code: string; message: string }[];
+    trial?: number;
+    output?: TicketResult["output"];
+    sources?: TicketResult["sources"];
+    cost_basis?: string;
   }[];
 };
 export async function api<T>(path: string, body?: unknown): Promise<T> {

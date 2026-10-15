@@ -2,6 +2,7 @@ import asyncio
 from collections import OrderedDict
 from datetime import datetime, timezone
 import time
+import math
 from uuid import uuid4
 from .demo import demo_output
 from .models import ModelOutput
@@ -31,6 +32,10 @@ ERROR_TEXT = {
     "unvalidated_url": "Модель вставила непроверенную ссылку.",
     "oversized_draft": "Черновик превысил ограничение длины.",
 }
+
+
+def known_amount(value):
+    return type(value) in (int, float) and math.isfinite(value) and value >= 0
 
 
 class CopilotService:
@@ -87,17 +92,25 @@ class CopilotService:
             d = self.kb.documents[sid]
             sources.append({"id": sid, "title": d["title"], "url": d["url"]})
         cost = None
+        cost_basis = "not_available"
         if usage:
             reported = usage.get("reported_cost_usd")
-            cost = (
-                reported
-                if isinstance(reported, (float, int))
-                else (
+            if known_amount(reported):
+                cost, cost_basis = reported, "reported"
+            elif all(
+                known_amount(value)
+                for value in (
+                    usage.get("input_tokens"),
+                    usage.get("output_tokens"),
+                    self.settings.input_price,
+                    self.settings.output_price,
+                )
+            ):
+                cost = (
                     usage["input_tokens"] * self.settings.input_price
                     + usage["output_tokens"] * self.settings.output_price
-                )
-                / 1_000_000
-            )
+                ) / 1_000_000
+                cost_basis = "estimate"
         result = {
             "id": str(uuid4()),
             "created_at": datetime.now(timezone.utc).isoformat(),
@@ -127,11 +140,11 @@ class CopilotService:
                 "provider_latency_ms": provider_latency_ms,
                 "usage": usage,
                 "cost_usd": cost,
-                "cost_basis": "reported"
-                if usage and usage.get("reported_cost_usd") is not None
-                else "estimate"
-                if cost is not None
-                else "not_available",
+                "cost_basis": cost_basis,
+                # A response's usage does not establish the cost of earlier attempts.
+                "cost_complete": cost is not None
+                and bool(usage)
+                and usage.get("attempts", 1) == 1,
                 "redacted": ticket != text,
             },
         }

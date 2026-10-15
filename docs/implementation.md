@@ -42,6 +42,8 @@ After the guard change, eight live development smoke scenarios passed 8/8 techni
 
 The report does not claim measured semantic correctness, advice-violation frequency, claim completeness or real-world ROI. Automated tests check format, source membership, routing and fail-closed behavior. The source evidence and complete draft must still be reviewed with the rubric.
 
+On 15 October, a [second practices audit](../research/08_practices_reaudit.md) added technical-v2 evaluation: explicit language labels and narrowly labelled urgency/sentiment cases, per-trial results, archived drafts/evidence and configuration hashes. Missing usage is no longer treated as zero, and cost from a successful retry does not establish the total cost of previous attempts. The API adapter also rejects malformed response envelopes safely. A demo-only personal KYC-status case now abstains instead of substituting general instructions. Forty-three service tests pass; 24 deterministic development scenarios repeated three times pass 72/72 after the demo fix. These are not new live OpenAI or independent semantic scores. The selected model, prompt and runtime routing are unchanged.
+
 ## Important limits
 
 - Local service, no users/SSO, bounded in-memory records, no durable ticketing or actual specialist dispatch.
