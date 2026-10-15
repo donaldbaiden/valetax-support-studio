@@ -64,3 +64,18 @@ def test_untrusted_host_is_rejected(client):
         client.get("/api/health", headers={"host": "untrusted.example"}).status_code
         == 400
     )
+
+
+@pytest.mark.parametrize("action", ["accept", "edit"])
+@pytest.mark.parametrize("text", [
+    "What are USDT withdrawal fees?",
+    "How do I deposit and what are USDT withdrawal fees?",
+])
+def test_missing_information_cannot_be_approved_as_a_complete_reply(client, action, text):
+    ticket = client.post("/api/tickets", json={"text": text}).json()
+    assert not ticket["specialist_review_required"]
+    response = client.post(f"/api/tickets/{ticket['id']}/review", json={
+        "action": action, "edited_draft": "A response typed without resolving the gap."
+    })
+    assert response.status_code == 409
+    assert client.post(f"/api/tickets/{ticket['id']}/review", json={"action": "escalate"}).status_code == 200

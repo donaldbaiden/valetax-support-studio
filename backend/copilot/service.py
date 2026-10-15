@@ -28,6 +28,10 @@ ERROR_TEXT = {
     "unsupported_evidence": "Доказательство не найдено в указанном источнике.",
     "missing_evidence": "Черновик не содержит проверяемых источников.",
     "missing_unknowns": "Не указаны неотвеченные части вопроса.",
+    "unexpected_client_draft": "При отсутствии данных модель не должна выдавать клиентский черновик.",
+    "missing_client_draft": "Модель не подготовила текст для клиента.",
+    "missing_operator_note": "Модель не указала специалисту, чего не хватает для ответа.",
+    "unresolved_unknowns": "Ответ помечен как готовый, но в нём остались неизвестные условия.",
     "unsafe_draft": "В черновике найден возможный запрещённый совет или решение.",
     "unvalidated_url": "Модель вставила непроверенную ссылку.",
     "oversized_draft": "Черновик превысил ограничение длины.",
@@ -82,6 +86,7 @@ class CopilotService:
             output = self.fallback(ticket)
         if errors:
             output = self.fallback(ticket)
+            output.operator_note = " ".join(ERROR_TEXT.get(e, e) for e in errors) + " Подготовьте ответ вручную после проверки данных."
         if output.category.value == "trading_advice":
             flags.add("trading_advice")
         if output.category.value in ("verification", "aml"):
@@ -173,14 +178,11 @@ class CopilotService:
             language="ru" if ru else "en",
             sentiment="unknown",
             disposition="abstain",
-            draft="Не удалось подготовить проверяемый ответ. Обращение требует проверки оператором."
-            if ru
-            else "A verified reply could not be prepared. This ticket requires a human review.",
+            draft="",
+            operator_note="Не удалось подготовить проверяемый ответ. Проверьте обращение и необходимые сведения вручную.",
             claims=[],
             unknowns=[
-                "Ответ не подтверждён доступными данными."
-                if ru
-                else "The reply is not verified against available information."
+                "Нет проверяемого ответа на обращение."
             ],
             risk_flags=sorted(flags),
             rationale="Безопасная передача человеку вместо непроверенного ответа.",

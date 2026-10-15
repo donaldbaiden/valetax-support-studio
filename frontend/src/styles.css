@@ -516,6 +516,42 @@ input::placeholder {
   font-size: 12px;
   margin-top: 9px;
 }
+.customer-reply h3 {
+  font-size: 12px;
+  font-weight: 500;
+  margin: 0 0 9px;
+  color: var(--muted);
+}
+.customer-reply > .small {
+  margin-bottom: 10px;
+}
+.operator-note {
+  background: #faf7ef;
+  border: 1px solid #e9dfcc;
+  border-radius: 6px;
+  padding: 15px 16px;
+  margin: 20px 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.operator-note h3 {
+  color: #785b2b;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+.operator-note h4 {
+  font-size: 12px;
+  font-weight: 500;
+  margin: 13px 0 5px;
+}
+.operator-note ul {
+  margin: 0;
+  padding-left: 17px;
+}
+.operator-note li + li {
+  margin-top: 4px;
+}
 .edit-draft {
   width: 100%;
   min-height: 250px;

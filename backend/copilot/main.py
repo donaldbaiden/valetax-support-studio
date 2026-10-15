@@ -75,6 +75,12 @@ def review(ticket_id: str, request: ReviewRequest):
         raise HTTPException(
             409, "Непроверенный черновик нельзя одобрить; передайте оператору."
         )
+    if request.action in ("accept", "edit") and (
+        r["output"]["disposition"] in ("partial", "abstain")
+        or r["output"]["unknowns"]
+        or not r["output"]["draft"].strip()
+    ):
+        raise HTTPException(409, "Полного ответа для клиента нет. Передайте обращение оператору для уточнения.")
     if request.action == "edit" and not request.edited_draft.strip():
         raise HTTPException(422, "Введите отредактированный ответ.")
     if request.action == "edit" and unsafe_draft(request.edited_draft):

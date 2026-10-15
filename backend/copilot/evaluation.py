@@ -110,7 +110,7 @@ async def evaluate(service, mode="demo", subset="smoke", repeats=1):
     }
     return {
         "run_id": str(uuid4()),
-        "eval_version": "technical-v2",
+        "eval_version": "technical-v3-audiences",
         "run_at": datetime.now(timezone.utc).isoformat(),
         "mode": "live" if real else "demo",
         "model": service.settings.model if real else "deterministic-demo",

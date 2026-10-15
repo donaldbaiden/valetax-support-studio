@@ -27,6 +27,7 @@ def valid_output(kb):
         sentiment="neutral",
         disposition="draft",
         draft="Click Deposit and choose an available payment channel.",
+        operator_note="",
         claims=[claim],
         unknowns=[],
         risk_flags=[],
@@ -159,6 +160,7 @@ def test_refusal_is_not_misclassified_as_a_recommendation():
 async def test_partial_requires_explicit_unknowns(kb):
     o = valid_output(kb)
     o.disposition = "partial"
+    o.operator_note = "Уточните недостающее условие."
     o.unknowns = []
     r = await CopilotService(Settings(key="test"), kb, FakeProvider(o)).process(
         "How do I deposit?"
@@ -177,3 +179,51 @@ async def test_demo_does_not_substitute_a_procedure_for_actual_kyc_status(kb, te
     assert result["output"]["disposition"] == "abstain"
     assert result["output"]["unknowns"]
     assert not result["output"]["claims"]
+
+
+@pytest.mark.asyncio
+async def test_unknown_fee_is_an_internal_handoff_not_a_customer_reply(kb):
+    result = await CopilotService(Settings(mode="demo"), kb).process(
+        "Какая комиссия за вывод в USDT? Назовите точную сумму.", "demo"
+    )
+    assert result["output"]["disposition"] == "abstain"
+    assert result["output"]["draft"] == ""
+    assert "USDT" in result["output"]["operator_note"]
+    assert result["output"]["unknowns"] == ["Актуальная комиссия за вывод в USDT."]
+    assert not result["checks"]["errors"]
+
+
+@pytest.mark.asyncio
+async def test_partial_keeps_supported_reply_and_missing_fee_separate(kb):
+    result = await CopilotService(Settings(mode="demo"), kb).process(
+        "Как пополнить счёт и какая комиссия за вывод в USDT?", "demo"
+    )
+    assert result["output"]["disposition"] == "partial"
+    assert "Deposit" in result["output"]["draft"]
+    assert "комисси" not in result["output"]["draft"].casefold()
+    assert "USDT" in result["output"]["operator_note"]
+    assert result["output"]["claims"]
+    assert not result["checks"]["errors"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("defect", ["internal_as_customer", "missing_note", "empty_customer", "unresolved_ready"])
+async def test_audience_contract_failures_do_not_become_copyable_replies(kb, defect):
+    output = valid_output(kb)
+    if defect == "internal_as_customer":
+        output.disposition = "abstain"
+        output.operator_note = "Комиссия неизвестна."
+        output.unknowns = ["Комиссия USDT."]
+        output.draft = "Обратитесь в службу поддержки."
+    elif defect == "missing_note":
+        output.disposition = "abstain"
+        output.draft = ""
+        output.unknowns = ["Комиссия USDT."]
+    elif defect == "empty_customer":
+        output.draft = ""
+    else:
+        output.unknowns = ["Комиссия USDT не установлена."]
+    result = await CopilotService(Settings(key="unit"), kb, FakeProvider(output)).process("What is the fee?")
+    assert result["checks"]["errors"]
+    assert result["output"]["draft"] == ""
+    assert result["output"]["operator_note"]

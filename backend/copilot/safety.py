@@ -80,6 +80,14 @@ def route(output, flags):
 
 def validate_evidence(output, kb):
     errors = []
+    if output.disposition == "abstain" and output.draft.strip():
+        errors.append("unexpected_client_draft")
+    if output.disposition != "abstain" and not output.draft.strip():
+        errors.append("missing_client_draft")
+    if output.disposition in ("partial", "abstain") and not output.operator_note.strip():
+        errors.append("missing_operator_note")
+    if output.disposition in ("draft", "refuse") and output.unknowns:
+        errors.append("unresolved_unknowns")
     for claim in output.claims:
         chunk = kb.chunks.get(claim.chunk_id)
         if not chunk or chunk["source_id"] != claim.source_id:

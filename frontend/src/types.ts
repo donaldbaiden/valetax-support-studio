@@ -29,6 +29,7 @@ export type TicketResult = {
     sentiment: string;
     disposition: string;
     draft: string;
+    operator_note?: string;
     claims: Claim[];
     unknowns: string[];
     rationale: string;

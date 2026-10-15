@@ -46,6 +46,8 @@ On 15 October, a [second practices audit](../research/08_practices_reaudit.md) a
 
 ## Important limits
 
+The subsequent [audience-format change](response_contract.md) uses prompt `support-v1.1-audiences`: customer text and internal support notes are separate. Abstentions have no customer draft; partial or missing-information outputs cannot be approved as complete replies. Five synthetic live checks passed the new format, with $0.0420247 reported API cost; this is a development check, not a replacement for the original baseline or independent semantic evaluation.
+
 - Local service, no users/SSO, bounded in-memory records, no durable ticketing or actual specialist dispatch.
 - Basic pattern-based masking is not full anonymization. Real documents/payment information require approved data handling and access controls.
 - The model and lexical guards can miss unfamiliar languages, indirect advice, implied policy or unsupported claims omitted from the claims list.

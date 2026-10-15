@@ -386,13 +386,13 @@ export default function App() {
                   ) : (
                     <div className="empty-answer">
                       <MessageSquare size={24} strokeWidth={1.5} />
-                      <p>Здесь появится черновик ответа.</p>
+                      <p>Здесь появится ответ или информация для поддержки.</p>
                     </div>
                   )}
                 </section>
               </div>
               <p className="workspace-note">
-                Ответы — черновики. Отправка клиенту не подключена.
+                Черновики проверяет оператор. Отправка клиенту не подключена.
               </p>
             </>
           )}
@@ -488,6 +488,15 @@ function ResultPanel({
     }
   }
   const hasErrors = r.checks.errors.length > 0;
+  const hasDraft =
+    r.output.disposition !== "abstain" && !!r.output.draft.trim() && !hasErrors;
+  const needsInformation =
+    ["partial", "abstain"].includes(r.output.disposition) ||
+    r.output.unknowns.length > 0;
+  const needsHandoff =
+    r.specialist_review_required || hasErrors || needsInformation;
+  const operatorNote =
+    r.output.operator_note || (needsHandoff ? r.output.rationale : "");
   const urgency: Record<string, string> = {
     low: "Низкий",
     normal: "Обычный",
@@ -503,7 +512,7 @@ function ResultPanel({
   return (
     <div className="result-content">
       <div className="section-top">
-        <h2>Черновик ответа</h2>
+        <h2>{hasDraft ? "Ответ" : "Нужен ответ специалиста"}</h2>
         <Pill tone={r.trace.mode === "live" ? "green" : "neutral"}>
           {r.trace.mode === "live" ? "OpenAI" : "Демо"}
         </Pill>
@@ -528,9 +537,7 @@ function ResultPanel({
           <dd>{sentiment[r.output.sentiment]}</dd>
         </div>
       </dl>
-      <div
-        className={`routing-banner ${r.specialist_review_required || hasErrors ? "warning" : ""}`}
-      >
+      <div className={`routing-banner ${needsHandoff ? "warning" : ""}`}>
         <strong>
           {queueNames[r.queue]} ·{" "}
           {r.specialist_review_required
@@ -549,29 +556,56 @@ function ResultPanel({
           ))}
         </div>
       )}
-      {editing && !r.review ? (
-        <textarea
-          className="edit-draft"
-          aria-label="Редактировать черновик"
-          value={edited}
-          onChange={(e) => setEdited(e.target.value)}
-        />
-      ) : (
-        <p className="draft-text">{r.review?.edited_draft || r.output.draft}</p>
+      {hasDraft && (
+        <section className="customer-reply" aria-label="Ответ клиенту">
+          <h3>
+            {r.output.disposition === "partial"
+              ? "Подтверждённая часть ответа"
+              : "Ответ клиенту"}
+          </h3>
+          {r.output.disposition === "partial" && (
+            <p className="small muted">
+              Перед отправкой оператору нужно дополнить ответ по пунктам ниже.
+            </p>
+          )}
+          {editing && !r.review ? (
+            <textarea
+              className="edit-draft"
+              aria-label="Редактировать черновик"
+              value={edited}
+              onChange={(e) => setEdited(e.target.value)}
+            />
+          ) : (
+            <p className="draft-text">
+              {r.review?.edited_draft || r.output.draft}
+            </p>
+          )}
+          <button className="text-button copy-button" onClick={onCopy}>
+            <Copy size={14} />
+            {r.output.disposition === "partial"
+              ? "Копировать часть ответа"
+              : "Копировать ответ"}
+          </button>
+        </section>
       )}
-      <button className="text-button copy-button" onClick={onCopy}>
-        <Copy size={14} />
-        Копировать
-      </button>
-      {r.output.unknowns.length > 0 && (
-        <div className="unknowns">
-          <h3>Нет данных в базе</h3>
-          <ul>
-            {r.output.unknowns.map((u, i) => (
-              <li key={i}>{u}</li>
-            ))}
-          </ul>
-        </div>
+      {(operatorNote || r.output.unknowns.length > 0) && (
+        <section
+          className="operator-note"
+          aria-label="Для специалиста поддержки"
+        >
+          <h3>Для специалиста поддержки</h3>
+          {operatorNote && <p>{operatorNote}</p>}
+          {r.output.unknowns.length > 0 && (
+            <>
+              <h4>Чего не хватает</h4>
+              <ul>
+                {r.output.unknowns.map((u, i) => (
+                  <li key={i}>{u}</li>
+                ))}
+              </ul>
+            </>
+          )}
+        </section>
       )}
       {r.output.claims.length > 0 && (
         <div className="evidence-list">
@@ -671,8 +705,10 @@ function ResultPanel({
                     {
                       accept: "Черновик принят",
                       edit: "Правка сохранена",
-                      reject: "Черновик отклонён",
-                      escalate: "Передача специалисту отмечена",
+                      reject: "Результат отклонён",
+                      escalate: r.specialist_review_required
+                        ? "Передача специалисту отмечена"
+                        : "Передача оператору отмечена",
                     } as Record<string, string>
                   )[r.review.action]
                 }
@@ -695,7 +731,7 @@ function ResultPanel({
               />
             </label>
             <div className="review-actions">
-              {r.specialist_review_required || hasErrors ? (
+              {needsHandoff ? (
                 <button
                   className="primary"
                   disabled={saving}
@@ -724,7 +760,7 @@ function ResultPanel({
                   <Check size={16} />
                 </button>
               )}
-              {!r.specialist_review_required && !hasErrors && (
+              {!needsHandoff && hasDraft && (
                 <button
                   className="secondary"
                   disabled={saving}
@@ -1141,12 +1177,26 @@ function TestingPage({ onError }: { onError: (s: string) => void }) {
                           {row?.output ? (
                             <div className="eval-output">
                               <strong>
-                                Черновик
+                                Результат
                                 {caseRows.length > 1
                                   ? ` · повтор ${row.trial}`
                                   : ""}
                               </strong>
-                              <p>{row.output.draft}</p>
+                              {row.output.disposition !== "abstain" &&
+                                row.output.draft.trim() && (
+                                  <>
+                                    <p className="small muted">Ответ клиенту</p>
+                                    <p>{row.output.draft}</p>
+                                  </>
+                                )}
+                              {row.output.operator_note && (
+                                <>
+                                  <p>
+                                    <strong>Для специалиста поддержки</strong>
+                                  </p>
+                                  <p>{row.output.operator_note}</p>
+                                </>
+                              )}
                               {row.output.claims.map((claim, index) => (
                                 <blockquote key={index}>
                                   <p>{claim.text}</p>

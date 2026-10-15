@@ -33,6 +33,7 @@ class ModelOutput(StrictModel):
     sentiment: Literal["positive", "neutral", "negative", "mixed", "unknown"]
     disposition: Literal["draft", "partial", "refuse", "abstain"]
     draft: str
+    operator_note: str
     claims: list[Claim]
     unknowns: list[str]
     risk_flags: list[

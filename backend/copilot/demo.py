@@ -101,8 +101,8 @@ def demo_output(text, kb):
         disposition = "abstain"
     elif "trading_advice" in flags and not deposit:
         draft = tr(
-            "Я могу помочь с процедурами обслуживания, но не даю торговых рекомендаций, сигналов, целей цены или советов по кредитному плечу.",
-            "I can help with support procedures, but cannot provide trading recommendations, signals, price targets, or leverage suggestions.",
+            "Мы не предоставляем торговые рекомендации, сигналы, целевые цены или советы по выбору кредитного плеча.",
+            "We do not provide trading recommendations, signals, price targets, or advice on choosing leverage.",
         )
         disposition = "refuse"
     elif re.search(
@@ -120,6 +120,14 @@ def demo_output(text, kb):
             )
         ]
         disposition = "abstain"
+        if deposit and re.search(r"how|как|bagaimana|cara", t):
+            draft = tr(
+                "Чтобы пополнить счёт, войдите в Member Area, нажмите Deposit и выберите доступный платёжный канал. Укажите реквизиты счёта и сумму.",
+                "To deposit, log in to your Member Area, click Deposit and select an available payment channel. Enter your account details and the amount.",
+            )
+            claim("deposit", "Click on the Deposit button and select your preferred payment channel", "Выбор платёжного канала через Deposit.")
+            claim("deposit", "Enter your account details and amount to deposit", "Ввод реквизитов и суммы пополнения.")
+            disposition = "partial"
     elif high:
         draft = tr(
             "Сообщение о возможном несанкционированном доступе требует срочной проверки человеком. Доступные страницы не содержат процедуры восстановления или подтверждения состояния счёта.",
@@ -203,8 +211,8 @@ def demo_output(text, kb):
         )
         if re.search(r"minimum|миним", t):
             draft = tr(
-                "В FAQ указан минимум от 8 USD в зависимости от типа счёта. Точный минимум для конкретного типа по этим страницам подтвердить нельзя.",
-                "The FAQ lists a minimum starting at USD 8, depending on account type. These pages do not confirm the exact minimum for a specific account type.",
+                "Минимальная сумма пополнения начинается от 8 USD и зависит от типа счёта.",
+                "The minimum deposit starts at USD 8 and depends on the account type.",
             )
             claims = []
             claim(
@@ -237,10 +245,6 @@ def demo_output(text, kb):
         elif "account_specific" in flags or re.search(
             r"not credited|not arrived|не зачис|не приш", t
         ):
-            draft += " " + tr(
-                "Состояние вашей операции нужно проверить оператору.",
-                "A human agent must check your actual transaction status.",
-            )
             flags.add("account_specific")
             unknowns = [
                 tr(
@@ -249,6 +253,9 @@ def demo_output(text, kb):
                 )
             ]
             disposition = "partial"
+            if not re.search(r"how|как|bagaimana|cara", t):
+                disposition = "abstain"
+                claims = []
     elif withdrawal:
         if "pending" in t:
             evidence = "This means your request in in queue and in the midst of getting processed. Once approved, you will be notified."
@@ -325,6 +332,30 @@ def demo_output(text, kb):
             claims = []
             unknowns = ["Perlu semakan manusia."]
             disposition = "abstain"
+    operator_note = ""
+    if disposition in ("partial", "abstain"):
+        if "complaint" in flags:
+            operator_note = "Нужен специалист по жалобам: исход обращения и возможность компенсации не установлены. Подготовьте ответ после проверки случая."
+        elif high:
+            operator_note = "Срочно проверьте сообщение о возможном несанкционированном доступе. В базе нет процедуры восстановления и фактического состояния счёта."
+        elif re.search(r"fee|commission|usdt|комисси", t):
+            operator_note = "В базе нет подтверждённой комиссии за вывод в USDT. Проверьте актуальный тариф и его применимость к операции, затем подготовьте ответ клиенту." if "usdt" in t else "Запрошенная комиссия не указана в базе. Проверьте актуальный тариф и применимость к операции."
+            unknowns = ["Актуальная комиссия за вывод в USDT."] if "usdt" in t else ["Запрошенная комиссия и условия её применения."]
+        elif category in ("verification", "aml"):
+            operator_note = "Проверьте статус или запрошенное решение по KYC/AML во внутреннем процессе. Справочная база не подтверждает результат проверки конкретного клиента."
+        elif "kb_conflict" in flags:
+            operator_note = "Инструкция вывода противоречива: часть шагов описывает пополнение. Уточните действующую процедуру перед подготовкой ответа."
+        elif "account_specific" in flags:
+            operator_note = "Проверьте фактическое состояние операции клиента. В справочной базе нет персонального статуса; общая инструкция не отвечает на этот вопрос."
+        elif deposit and re.search(r"minimum|миним", t):
+            operator_note = "Уточните минимум для нужного типа счёта: база указывает только общий ориентир."
+        elif "trading_advice" in flags:
+            operator_note = "Торговая часть отклонена. Перед отправкой проверьте процедурную часть ответа; торговую рекомендацию добавлять нельзя."
+        else:
+            operator_note = "Для полного ответа не хватает подтверждённых сведений. Уточните запрос или необходимые условия и подготовьте ответ вручную."
+    if disposition == "abstain":
+        draft = ""
+        claims = []
     return ModelOutput(
         category=category,
         secondary_categories=["trading_advice"]
@@ -335,6 +366,7 @@ def demo_output(text, kb):
         sentiment=sentiment,
         disposition=disposition,
         draft=draft,
+        operator_note=operator_note,
         claims=claims,
         unknowns=unknowns,
         risk_flags=sorted(flags),

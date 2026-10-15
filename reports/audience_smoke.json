@@ -1,0 +1,262 @@
+{
+  "prompt_version": "support-v1.1-audiences",
+  "scope": "Five synthetic audience-format checks, not an independent quality benchmark",
+  "rows": [
+    {
+      "case": "fee",
+      "ticket": "Какая комиссия за вывод в USDT? Назовите точную сумму.",
+      "output": {
+        "category": "withdrawal",
+        "secondary_categories": [],
+        "urgency": "normal",
+        "language": "ru",
+        "sentiment": "neutral",
+        "disposition": "abstain",
+        "draft": "",
+        "operator_note": "В предоставленных материалах нет комиссии за вывод в USDT. Проверьте актуальный тариф и условия его применимости, затем подготовьте ответ с точной суммой.",
+        "claims": [],
+        "unknowns": [
+          "Актуальная комиссия за вывод в USDT и условия расчёта точной суммы."
+        ],
+        "risk_flags": [],
+        "rationale": "Точная комиссия в источниках не указана; без проверки тарифа ответить нельзя."
+      },
+      "queue": "support",
+      "errors": [],
+      "trace": {
+        "mode": "live",
+        "model": "openai/gpt-6.1-sol",
+        "kb_version": "valetax-2026-10-14-v1",
+        "prompt_version": "support-v1.1-audiences",
+        "latency_ms": 5479,
+        "queue_wait_ms": 1,
+        "provider_latency_ms": 5476,
+        "usage": {
+          "input_tokens": 3635,
+          "output_tokens": 166,
+          "reported_cost_usd": 0.0072828,
+          "provider_request_id": "gen-1792063895-69YxKZcCnK5kTHDsXkV9",
+          "attempts": 1
+        },
+        "cost_usd": 0.0072828,
+        "cost_basis": "reported",
+        "cost_complete": true,
+        "redacted": false
+      },
+      "sources": []
+    },
+    {
+      "case": "routine",
+      "ticket": "Как пополнить счёт?",
+      "output": {
+        "category": "deposit",
+        "secondary_categories": [],
+        "urgency": "normal",
+        "language": "ru",
+        "sentiment": "neutral",
+        "disposition": "draft",
+        "draft": "Чтобы пополнить счёт:\n1. Войдите в личный кабинет.\n2. Нажмите «Deposit» и выберите удобный способ оплаты.\n3. Введите данные счёта и сумму пополнения.",
+        "operator_note": "",
+        "claims": [
+          {
+            "text": "Войдите в личный кабинет.",
+            "source_id": "deposit",
+            "chunk_id": "deposit:01",
+            "evidence": "Log in\nto your Member Area"
+          },
+          {
+            "text": "Нажмите «Deposit» и выберите удобный способ оплаты.",
+            "source_id": "deposit",
+            "chunk_id": "deposit:01",
+            "evidence": "Click on the Deposit button and select your preferred payment channel"
+          },
+          {
+            "text": "Введите данные счёта и сумму пополнения.",
+            "source_id": "deposit",
+            "chunk_id": "deposit:01",
+            "evidence": "Enter your account\ndetails\nand\namount\nto deposit"
+          }
+        ],
+        "unknowns": [],
+        "risk_flags": [],
+        "rationale": "Общий вопрос о пополнении; шаги прямо подтверждены инструкцией deposit."
+      },
+      "queue": "support",
+      "errors": [],
+      "trace": {
+        "mode": "live",
+        "model": "openai/gpt-6.1-sol",
+        "kb_version": "valetax-2026-10-14-v1",
+        "prompt_version": "support-v1.1-audiences",
+        "latency_ms": 6881,
+        "queue_wait_ms": 0,
+        "provider_latency_ms": 6881,
+        "usage": {
+          "input_tokens": 3626,
+          "output_tokens": 325,
+          "reported_cost_usd": 0.0123135,
+          "provider_request_id": "gen-1792063895-0H5uGai5MaYpYxChEQu3",
+          "attempts": 1
+        },
+        "cost_usd": 0.0123135,
+        "cost_basis": "reported",
+        "cost_complete": true,
+        "redacted": false
+      },
+      "sources": [
+        {
+          "id": "deposit",
+          "title": "How to Deposit",
+          "url": "https://valetax.com/how-to-deposit/"
+        }
+      ]
+    },
+    {
+      "case": "partial",
+      "ticket": "Как пополнить счёт и какая комиссия за вывод в USDT?",
+      "output": {
+        "category": "deposit",
+        "secondary_categories": [
+          "withdrawal"
+        ],
+        "urgency": "normal",
+        "language": "ru",
+        "sentiment": "neutral",
+        "disposition": "partial",
+        "draft": "Чтобы пополнить счёт, войдите в личный кабинет, нажмите Deposit, выберите удобный платёжный канал и укажите реквизиты счёта и сумму пополнения.",
+        "operator_note": "В базе нет комиссии за вывод в USDT. Проверьте актуальный тариф и его применимость к операции, затем дополните ответ клиенту.",
+        "claims": [
+          {
+            "text": "Для пополнения войдите в личный кабинет, нажмите Deposit, выберите платёжный канал и укажите реквизиты счёта и сумму пополнения.",
+            "source_id": "deposit",
+            "chunk_id": "deposit:01",
+            "evidence": "Log in\nto your Member Area\nStep 2\nSelect\nyour preferred payment channel\nClick on the Deposit button and select your preferred payment channel\nStep 3\nEnter your account\ndetails\nand\namount\nto deposit"
+          }
+        ],
+        "unknowns": [
+          "Актуальная комиссия за вывод в USDT и её применимость к операции клиента."
+        ],
+        "risk_flags": [],
+        "rationale": "Инструкция пополнения подтверждена источником; комиссия за вывод в USDT не указана и требует проверки специалистом."
+      },
+      "queue": "support",
+      "errors": [],
+      "trace": {
+        "mode": "live",
+        "model": "openai/gpt-6.1-sol",
+        "kb_version": "valetax-2026-10-14-v1",
+        "prompt_version": "support-v1.1-audiences",
+        "latency_ms": 11678,
+        "queue_wait_ms": 5409,
+        "provider_latency_ms": 6269,
+        "usage": {
+          "input_tokens": 3634,
+          "output_tokens": 329,
+          "reported_cost_usd": 0.0089103,
+          "provider_request_id": "gen-1792063900-7JVUaYwdhZY4BjFs7u66",
+          "attempts": 1
+        },
+        "cost_usd": 0.0089103,
+        "cost_basis": "reported",
+        "cost_complete": true,
+        "redacted": false
+      },
+      "sources": [
+        {
+          "id": "deposit",
+          "title": "How to Deposit",
+          "url": "https://valetax.com/how-to-deposit/"
+        }
+      ]
+    },
+    {
+      "case": "kyc_status",
+      "ticket": "Мой счёт уже верифицирован?",
+      "output": {
+        "category": "verification",
+        "secondary_categories": [],
+        "urgency": "normal",
+        "language": "ru",
+        "sentiment": "neutral",
+        "disposition": "abstain",
+        "draft": "",
+        "operator_note": "Текущий статус верификации счёта неизвестен. Необходимо проверить статус конкретного счёта перед ответом клиенту.",
+        "claims": [],
+        "unknowns": [
+          "Текущий статус верификации счёта клиента."
+        ],
+        "risk_flags": [
+          "kyc_aml",
+          "account_specific"
+        ],
+        "rationale": "Запрос касается индивидуального статуса верификации; в предоставленных материалах этих данных нет."
+      },
+      "queue": "compliance",
+      "errors": [],
+      "trace": {
+        "mode": "live",
+        "model": "openai/gpt-6.1-sol",
+        "kb_version": "valetax-2026-10-14-v1",
+        "prompt_version": "support-v1.1-audiences",
+        "latency_ms": 10518,
+        "queue_wait_ms": 6869,
+        "provider_latency_ms": 3648,
+        "usage": {
+          "input_tokens": 3628,
+          "output_tokens": 126,
+          "reported_cost_usd": 0.0068653,
+          "provider_request_id": "gen-1792063901-GNvfmQIYNdeWHz5FIlTe",
+          "attempts": 1
+        },
+        "cost_usd": 0.0068653,
+        "cost_basis": "reported",
+        "cost_complete": true,
+        "redacted": false
+      },
+      "sources": []
+    },
+    {
+      "case": "advice",
+      "ticket": "Стоит ли сейчас купить EUR/USD?",
+      "output": {
+        "category": "trading_advice",
+        "secondary_categories": [],
+        "urgency": "normal",
+        "language": "ru",
+        "sentiment": "neutral",
+        "disposition": "refuse",
+        "draft": "Мы не предоставляем торговых рекомендаций и не можем посоветовать, стоит ли сейчас покупать EUR/USD.",
+        "operator_note": "",
+        "claims": [],
+        "unknowns": [],
+        "risk_flags": [
+          "trading_advice"
+        ],
+        "rationale": "Запрос содержит только просьбу о торговой рекомендации; требуется вежливый отказ."
+      },
+      "queue": "support",
+      "errors": [],
+      "trace": {
+        "mode": "live",
+        "model": "openai/gpt-6.1-sol",
+        "kb_version": "valetax-2026-10-14-v1",
+        "prompt_version": "support-v1.1-audiences",
+        "latency_ms": 17558,
+        "queue_wait_ms": 10518,
+        "provider_latency_ms": 7041,
+        "usage": {
+          "input_tokens": 3627,
+          "output_tokens": 105,
+          "reported_cost_usd": 0.0066528,
+          "provider_request_id": "gen-1792063907-Lz46RBzbFop3QNuysm20",
+          "attempts": 1
+        },
+        "cost_usd": 0.0066528,
+        "cost_basis": "reported",
+        "cost_complete": true,
+        "redacted": false
+      },
+      "sources": []
+    }
+  ]
+}
