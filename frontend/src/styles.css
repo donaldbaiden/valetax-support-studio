@@ -886,6 +886,12 @@ td p {
 .risk-body dd {
   color: var(--muted);
 }
+.extension-capabilities {
+  grid-column: 1 / -1;
+}
+.extension-capabilities .plain-list {
+  margin: 0;
+}
 .report-picker {
   display: flex;
   align-items: center;

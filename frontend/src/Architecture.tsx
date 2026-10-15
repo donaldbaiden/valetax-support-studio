@@ -299,6 +299,24 @@ export function ArchitectureContent() {
                   <dt>Изменение</dt>
                   <dd>{e.change}</dd>
                 </div>
+                {e.capabilities && (
+                  <div className="extension-capabilities">
+                    <dt>Что можно добавить</dt>
+                    <dd>
+                      <ul className="plain-list">
+                        {e.capabilities.map((capability) => (
+                          <li key={capability}>{capability}</li>
+                        ))}
+                      </ul>
+                    </dd>
+                  </div>
+                )}
+                {e.boundaries && (
+                  <div>
+                    <dt>Границы</dt>
+                    <dd>{e.boundaries}</dd>
+                  </div>
+                )}
                 <div>
                   <dt>Проверка</dt>
                   <dd>{e.proof}</dd>
