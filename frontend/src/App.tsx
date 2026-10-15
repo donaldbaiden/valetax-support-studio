@@ -32,6 +32,7 @@ import {
 } from "./types";
 import { risks, rubric } from "./guide";
 import { ArchitectureContent, FailoverPlan } from "./Architecture";
+import { ScalingPlan } from "./Scaling";
 
 type View =
   | "workspace"
@@ -854,62 +855,7 @@ function OperationsPage() {
   return (
     <>
       <PageTitle title="Эксплуатация" />
-      <section className="panel section-block">
-        <h2>Масштабирование</h2>
-        <p className="section-description">
-          Исходный объём — 10 000 обращений в месяц, около 333 в день. Пиковая
-          нагрузка пока неизвестна.
-        </p>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Этап</th>
-                <th>Конфигурация</th>
-                <th>Статус</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <strong>Первая версия</strong>
-                </td>
-                <td>
-                  Локальный сервис, ручной ввод, проверка оператором.
-                  Одновременно до двух вызовов модели.
-                </td>
-                <td>
-                  <Pill tone="green">Реализовано</Pill>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Рабочий пилот</strong>
-                </td>
-                <td>
-                  API системы поддержки, авторизация и роли, постоянное
-                  хранение, очередь, измерение времени операторов.
-                </td>
-                <td>
-                  <Pill>План</Pill>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Рост нагрузки и базы</strong>
-                </td>
-                <td>
-                  Рабочие процессы из очереди, ограничения запросов и мониторинг
-                  задержек. Поиск и версии SOP по мере роста базы.
-                </td>
-                <td>
-                  <Pill>План</Pill>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <ScalingPlan />
       <section className="section-block">
         <h2>Проблемы и действия</h2>
         <div className="risk-list">
