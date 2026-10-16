@@ -195,6 +195,7 @@ export function ArchitectureContent() {
     current: "llm",
     precheck: "triage",
     retrieval: "fusion",
+    "sop-tools": "tool",
     review: "verifier",
   };
   return (
@@ -277,7 +278,7 @@ export function ArchitectureContent() {
             <li>Торговые рекомендации отклоняются.</li>
             <li>Жалобы, KYC и AML передаются специалисту.</li>
             <li>Условия, комиссии и сроки — только из базы.</li>
-            <li>Если данных нет — ответ сообщает об этом.</li>
+            <li>Если данных нет — специалист видит, чего не хватает.</li>
           </ul>
         </section>
       </div>
