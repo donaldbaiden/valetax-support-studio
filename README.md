@@ -6,7 +6,7 @@
 
 ## Быстрый запуск без API-ключа
 
-Нужны **Python 3.12+**, **[uv](https://docs.astral.sh/uv/getting-started/installation/)** и **Node.js 22+ с npm**. В GitHub Actions проект проверяется на Python 3.12 и Node.js 22.
+Нужны **Python 3.12+**, **[uv](https://docs.astral.sh/uv/getting-started/installation/)** и **Node.js 22+ с npm**. Установка, сборка и запуск без ключа проверены в чистой копии на Python 3.12 и Node.js 24.
 
 ```bash
 git clone https://github.com/donaldbaiden/valetax-support-studio.git
@@ -64,6 +64,8 @@ uv run pytest -q
 uv run python scripts/evaluate.py --mode demo --subset all
 uv run python scripts/evaluate.py --mode live --subset smoke
 ```
+
+[Пример конфигурации GitHub Actions](docs/ci.github-actions.yml.example) содержит проверки на Python 3.12 и Node.js 22. Автоматический CI сейчас не подключён. Для включения нужно поместить файл в `.github/workflows/ci.yml` и загрузить его с авторизацией, разрешающей работу с workflow. Секреты для этих проверок не нужны.
 
 Live-eval выполняет платные вызовы с настроенным ключом. Полный набор: `--subset all`. Кнопка в интерфейсе запускает восемь smoke-случаев. В UI доступны сохранённые отчёты и все 32 synthetic-сценария.
 
