@@ -1,0 +1,840 @@
+{
+  "run_id": "bfe7d494-d368-49ae-a906-6b0c01d1c3d6",
+  "eval_version": "technical-v2",
+  "run_at": "2026-10-15T11:19:27.035888+00:00",
+  "mode": "live",
+  "model": "openai/gpt-6.1-sol",
+  "subset": "smoke",
+  "repeats": 1,
+  "unique_cases": 8,
+  "consistent_cases": 8,
+  "classification_checks": {
+    "language": {
+      "correct": 8,
+      "total": 8
+    },
+    "urgency": {
+      "correct": 0,
+      "total": 0
+    },
+    "sentiment": {
+      "correct": 0,
+      "total": 0
+    }
+  },
+  "manifest": {
+    "dataset_sha256": "2f25e64b6a230c0cf1146a9f1e4b0d78304e5cf562fbfc5f1afea9abac90011c",
+    "selected_case_ids": [
+      "E01",
+      "E05",
+      "E06",
+      "E07",
+      "E10",
+      "E12",
+      "E14",
+      "E17"
+    ],
+    "dataset_status": "development_only_initial_holdout_consumed",
+    "prompt_version": "support-v1.0",
+    "prompt_sha256": "7a719722610409d358e1525a2fa139dbd955796164be633303221d597fbe7b3a",
+    "schema_sha256": "9d89f39b766c72ec82f47f5236d4b5e45cc001123af08abbe5582dc795e7b17d",
+    "safety_sha256": "d9dca44ac264da9d6444029450a87d5108803dc5890561d305a19a66b3b05901",
+    "provider_adapter_sha256": "5866ad19eb73ad1bfa7657059495a2a5208736506c2964d05c0df53ceec7ad93",
+    "code_sha256": {
+      "evaluation.py": "ff9293a25a10351334b43c476c6f755a8cdc8c7f95ea58cafa1f7eb3234db690",
+      "service.py": "d46f9ff0d2f43f4b3b6307d6c6a924cfe4da081ca7c772aa76c09a69cc701e41",
+      "demo.py": "95f2b4cd9a587a80347792f9cb8928627b1024941b6ac367e2b068cfa4ae0d0b",
+      "kb.py": "1c552d2aa61d42196374c743464db9245f60b06e746ef681128eb8ee367da975"
+    },
+    "kb_sha256": "234419cbe760d6db7284844aa68e1d00a53ba7a7f283fc1424b059cd20c40df4",
+    "max_output_tokens": 3000,
+    "provider_timeout_seconds": 40.0,
+    "input_price_per_million": 2.0,
+    "output_price_per_million": 10.0
+  },
+  "kb_version": "valetax-2026-10-14-v1",
+  "total": 8,
+  "passed": 8,
+  "category_correct": 8,
+  "route_correct": 8,
+  "cost_usd": 0.082935,
+  "cost_complete": true,
+  "p50_latency_ms": 13978,
+  "p95_latency_ms": 24846,
+  "semantic_quality": "not_measured",
+  "note": "Технические проверки: категория, маршрут, тип ответа, review, наличие evidence; язык, срочность и тональность только в случаях с соответствующей разметкой. Смысл и полнота требуют эксперта. Повторы показывают стабильность технических проверок, не семантическую надёжность. Пакет concurrency=2: latency включает очередь, provider_latency сохранена отдельно. Расход — известная часть, оценка по тарифу помечена отдельно, стоимость ранних повторов может быть неизвестна. Демо проверяет шаблоны, не LLM.",
+  "rows": [
+    {
+      "id": "E01",
+      "split": "dev",
+      "title": "Пополнение",
+      "trial": 1,
+      "ticket": "How do I deposit?",
+      "expected": {
+        "categories": [
+          "deposit"
+        ],
+        "queues": [
+          "support"
+        ],
+        "dispositions": [
+          "draft"
+        ],
+        "languages": [
+          "en"
+        ]
+      },
+      "actual": {
+        "category": "deposit",
+        "queue": "support",
+        "disposition": "draft",
+        "language": "en",
+        "urgency": "normal",
+        "sentiment": "neutral"
+      },
+      "output": {
+        "category": "deposit",
+        "secondary_categories": [],
+        "urgency": "normal",
+        "language": "en",
+        "sentiment": "neutral",
+        "disposition": "draft",
+        "draft": "To deposit, log in to your Member Area, click Deposit, and select your preferred payment channel. Then enter your account details and the amount you want to deposit.",
+        "claims": [
+          {
+            "text": "Log in to your Member Area, click Deposit, select your preferred payment channel, and enter your account details and deposit amount.",
+            "source_id": "deposit",
+            "chunk_id": "deposit:01",
+            "evidence": "Log in\nto your Member Area\nStep 2\nSelect\nyour preferred payment channel\nClick on the Deposit button and select your preferred payment channel\nStep 3\nEnter your account\ndetails\nand\namount\nto deposit"
+          }
+        ],
+        "unknowns": [],
+        "risk_flags": [],
+        "rationale": "Порядок пополнения подтверждён страницей deposit; дополнительных сведений для ответа не требуется."
+      },
+      "sources": [
+        {
+          "id": "deposit",
+          "title": "How to Deposit",
+          "url": "https://valetax.com/how-to-deposit/"
+        }
+      ],
+      "flags": [],
+      "trace": {
+        "mode": "live",
+        "model": "openai/gpt-6.1-sol",
+        "kb_version": "valetax-2026-10-14-v1",
+        "prompt_version": "support-v1.0",
+        "latency_ms": 5192,
+        "queue_wait_ms": 3,
+        "provider_latency_ms": 5189,
+        "usage": {
+          "input_tokens": 3142,
+          "output_tokens": 248,
+          "reported_cost_usd": 0.0103335,
+          "provider_request_id": "gen-1792063142-9liWooYKl5gfeSKsGiKT",
+          "attempts": 1
+        },
+        "cost_usd": 0.0103335,
+        "cost_basis": "reported",
+        "cost_complete": true,
+        "redacted": false
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true,
+        "language": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 5192,
+      "queue_wait_ms": 3,
+      "provider_latency_ms": 5189,
+      "cost_usd": 0.0103335,
+      "cost_basis": "reported",
+      "cost_complete": true,
+      "errors": []
+    },
+    {
+      "id": "E05",
+      "split": "dev",
+      "title": "Pending",
+      "trial": 1,
+      "ticket": "What does withdrawal pending mean?",
+      "expected": {
+        "categories": [
+          "withdrawal"
+        ],
+        "queues": [
+          "support"
+        ],
+        "dispositions": [
+          "draft"
+        ],
+        "languages": [
+          "en"
+        ]
+      },
+      "actual": {
+        "category": "withdrawal",
+        "queue": "support",
+        "disposition": "draft",
+        "language": "en",
+        "urgency": "normal",
+        "sentiment": "neutral"
+      },
+      "output": {
+        "category": "withdrawal",
+        "secondary_categories": [],
+        "urgency": "normal",
+        "language": "en",
+        "sentiment": "neutral",
+        "disposition": "draft",
+        "draft": "A withdrawal status of “pending” means your request is in the queue and being processed. You’ll be notified once it is approved.",
+        "claims": [
+          {
+            "text": "A withdrawal status of “pending” means your request is in the queue and being processed. You’ll be notified once it is approved.",
+            "source_id": "withdraw",
+            "chunk_id": "withdraw:09",
+            "evidence": "This means your request in in queue and in the midst of getting processed. Once approved, you will be notified."
+          }
+        ],
+        "unknowns": [],
+        "risk_flags": [],
+        "rationale": "Дан общий смысл статуса pending по FAQ без утверждений о конкретной заявке или сроках вывода."
+      },
+      "sources": [
+        {
+          "id": "withdraw",
+          "title": "How to Withdraw",
+          "url": "https://valetax.com/how-to-withdraw/"
+        }
+      ],
+      "flags": [],
+      "trace": {
+        "mode": "live",
+        "model": "openai/gpt-6.1-sol",
+        "kb_version": "valetax-2026-10-14-v1",
+        "prompt_version": "support-v1.0",
+        "latency_ms": 4971,
+        "queue_wait_ms": 0,
+        "provider_latency_ms": 4968,
+        "usage": {
+          "input_tokens": 3143,
+          "output_tokens": 218,
+          "reported_cost_usd": 0.010036,
+          "provider_request_id": "gen-1792063142-XzkNUudxTQwWjHC6UykS",
+          "attempts": 1
+        },
+        "cost_usd": 0.010036,
+        "cost_basis": "reported",
+        "cost_complete": true,
+        "redacted": false
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true,
+        "language": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 4971,
+      "queue_wait_ms": 0,
+      "provider_latency_ms": 4968,
+      "cost_usd": 0.010036,
+      "cost_basis": "reported",
+      "cost_complete": true,
+      "errors": []
+    },
+    {
+      "id": "E06",
+      "split": "dev",
+      "title": "Причина моего отказа",
+      "trial": 1,
+      "ticket": "Why was my withdrawal rejected?",
+      "expected": {
+        "categories": [
+          "withdrawal"
+        ],
+        "queues": [
+          "payments"
+        ],
+        "dispositions": [
+          "partial",
+          "abstain"
+        ],
+        "languages": [
+          "en"
+        ]
+      },
+      "actual": {
+        "category": "withdrawal",
+        "queue": "payments",
+        "disposition": "partial",
+        "language": "en",
+        "urgency": "normal",
+        "sentiment": "neutral"
+      },
+      "output": {
+        "category": "withdrawal",
+        "secondary_categories": [],
+        "urgency": "normal",
+        "language": "en",
+        "sentiment": "neutral",
+        "disposition": "partial",
+        "draft": "I can’t confirm the reason for your specific withdrawal rejection. The FAQ lists possible reasons: an unverified account, an error in the details entered, or insufficient margin to process the withdrawal. It also states that the rejection reason will be sent by email. Please check for that email; if you haven’t received it, please contact support for clarification.",
+        "claims": [
+          {
+            "text": "Possible rejection reasons include an unverified account, an error in the details entered, or insufficient margin to process the withdrawal.",
+            "source_id": "withdraw",
+            "chunk_id": "withdraw:10",
+            "evidence": "It could be that your account has not been verified, a possible error to data entered or insifficient margin to process withdrawals."
+          },
+          {
+            "text": "The rejection reason will be sent by email.",
+            "source_id": "withdraw",
+            "chunk_id": "withdraw:10",
+            "evidence": "We will notify you via email on the rejection reason to help fix this issue."
+          }
+        ],
+        "unknowns": [
+          "The actual reason your withdrawal request was rejected."
+        ],
+        "risk_flags": [
+          "account_specific"
+        ],
+        "rationale": "Приведены только возможные причины из FAQ; фактическая причина отказа требует проверки специалистом."
+      },
+      "sources": [
+        {
+          "id": "withdraw",
+          "title": "How to Withdraw",
+          "url": "https://valetax.com/how-to-withdraw/"
+        }
+      ],
+      "flags": [
+        "account_specific"
+      ],
+      "trace": {
+        "mode": "live",
+        "model": "openai/gpt-6.1-sol",
+        "kb_version": "valetax-2026-10-14-v1",
+        "prompt_version": "support-v1.0",
+        "latency_ms": 11621,
+        "queue_wait_ms": 4958,
+        "provider_latency_ms": 6662,
+        "usage": {
+          "input_tokens": 3143,
+          "output_tokens": 338,
+          "reported_cost_usd": 0.011236,
+          "provider_request_id": "gen-1792063147-4URe7TWhwesqWMfPes36",
+          "attempts": 1
+        },
+        "cost_usd": 0.011236,
+        "cost_basis": "reported",
+        "cost_complete": true,
+        "redacted": false
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true,
+        "language": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 11621,
+      "queue_wait_ms": 4958,
+      "provider_latency_ms": 6662,
+      "cost_usd": 0.011236,
+      "cost_basis": "reported",
+      "cost_complete": true,
+      "errors": []
+    },
+    {
+      "id": "E07",
+      "split": "dev",
+      "title": "Жалоба на вывод",
+      "trial": 1,
+      "ticket": "I have a complaint: my withdrawal has not arrived. Approve compensation.",
+      "expected": {
+        "categories": [
+          "complaint",
+          "withdrawal"
+        ],
+        "queues": [
+          "complaints"
+        ],
+        "dispositions": [
+          "partial",
+          "abstain"
+        ],
+        "languages": [
+          "en"
+        ]
+      },
+      "actual": {
+        "category": "complaint",
+        "queue": "complaints",
+        "disposition": "partial",
+        "language": "en",
+        "urgency": "normal",
+        "sentiment": "negative"
+      },
+      "output": {
+        "category": "complaint",
+        "secondary_categories": [
+          "withdrawal"
+        ],
+        "urgency": "normal",
+        "language": "en",
+        "sentiment": "negative",
+        "disposition": "partial",
+        "draft": "I’m sorry your withdrawal has not arrived. Your complaint and compensation request need review by a human specialist; I cannot approve compensation or determine liability. If you have not received the funds within 24 hours, the published guidance is to contact support for assistance. This is a contact threshold, not a guaranteed withdrawal timeframe. Please share when you submitted the withdrawal and any request reference so a specialist can investigate.",
+        "claims": [
+          {
+            "text": "If funds have not arrived within 24 hours, the published guidance is to contact support; this is a contact threshold, not a guaranteed withdrawal timeframe.",
+            "source_id": "withdraw",
+            "chunk_id": "withdraw:11",
+            "evidence": "Should you not receive your funds within 24 hours, please reach out to our friendly support team for assistance."
+          }
+        ],
+        "unknowns": [
+          "When the withdrawal was submitted and its request reference.",
+          "The withdrawal’s actual status, reason for non-arrival and expected arrival time.",
+          "The outcome of the complaint and whether compensation is warranted."
+        ],
+        "risk_flags": [
+          "complaint",
+          "account_specific"
+        ],
+        "rationale": "Дана опубликованная рекомендация по обращению в поддержку. Статус вывода неизвестен; жалоба и требование компенсации требуют рассмотрения специалистом без обещания результата."
+      },
+      "sources": [
+        {
+          "id": "withdraw",
+          "title": "How to Withdraw",
+          "url": "https://valetax.com/how-to-withdraw/"
+        }
+      ],
+      "flags": [
+        "account_specific",
+        "complaint"
+      ],
+      "trace": {
+        "mode": "live",
+        "model": "openai/gpt-6.1-sol",
+        "kb_version": "valetax-2026-10-14-v1",
+        "prompt_version": "support-v1.0",
+        "latency_ms": 12339,
+        "queue_wait_ms": 5107,
+        "provider_latency_ms": 7232,
+        "usage": {
+          "input_tokens": 3152,
+          "output_tokens": 343,
+          "reported_cost_usd": 0.0113085,
+          "provider_request_id": "gen-1792063147-CxWzKNok2hokJVCuuWpM",
+          "attempts": 1
+        },
+        "cost_usd": 0.0113085,
+        "cost_basis": "reported",
+        "cost_complete": true,
+        "redacted": false
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true,
+        "language": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 12339,
+      "queue_wait_ms": 5107,
+      "provider_latency_ms": 7232,
+      "cost_usd": 0.0113085,
+      "cost_basis": "reported",
+      "cost_complete": true,
+      "errors": []
+    },
+    {
+      "id": "E10",
+      "split": "dev",
+      "title": "Комиссия",
+      "trial": 1,
+      "ticket": "What are USDT withdrawal fees?",
+      "expected": {
+        "categories": [
+          "withdrawal"
+        ],
+        "queues": [
+          "support"
+        ],
+        "dispositions": [
+          "abstain"
+        ],
+        "languages": [
+          "en"
+        ]
+      },
+      "actual": {
+        "category": "withdrawal",
+        "queue": "support",
+        "disposition": "abstain",
+        "language": "en",
+        "urgency": "normal",
+        "sentiment": "neutral"
+      },
+      "output": {
+        "category": "withdrawal",
+        "secondary_categories": [],
+        "urgency": "normal",
+        "language": "en",
+        "sentiment": "neutral",
+        "disposition": "abstain",
+        "draft": "The available information does not specify USDT withdrawal fees. Please contact support to confirm any applicable fee before submitting a withdrawal.",
+        "claims": [],
+        "unknowns": [
+          "Whether USDT withdrawals are supported and what fees, if any, apply."
+        ],
+        "risk_flags": [],
+        "rationale": "В базе нет сведений о поддержке вывода USDT и комиссиях; требуется уточнение у поддержки."
+      },
+      "sources": [],
+      "flags": [],
+      "trace": {
+        "mode": "live",
+        "model": "openai/gpt-6.1-sol",
+        "kb_version": "valetax-2026-10-14-v1",
+        "prompt_version": "support-v1.0",
+        "latency_ms": 15617,
+        "queue_wait_ms": 11621,
+        "provider_latency_ms": 3997,
+        "usage": {
+          "input_tokens": 3144,
+          "output_tokens": 150,
+          "reported_cost_usd": 0.0093585,
+          "provider_request_id": "gen-1792063154-xqMGSV0VmNLQBuMnQneo",
+          "attempts": 1
+        },
+        "cost_usd": 0.0093585,
+        "cost_basis": "reported",
+        "cost_complete": true,
+        "redacted": false
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true,
+        "language": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 15617,
+      "queue_wait_ms": 11621,
+      "provider_latency_ms": 3997,
+      "cost_usd": 0.0093585,
+      "cost_basis": "reported",
+      "cost_complete": true,
+      "errors": []
+    },
+    {
+      "id": "E12",
+      "split": "dev",
+      "title": "Документы KYC",
+      "trial": 1,
+      "ticket": "Which documents do I need for KYC verification?",
+      "expected": {
+        "categories": [
+          "verification"
+        ],
+        "queues": [
+          "compliance"
+        ],
+        "dispositions": [
+          "draft"
+        ],
+        "languages": [
+          "en"
+        ]
+      },
+      "actual": {
+        "category": "verification",
+        "queue": "compliance",
+        "disposition": "draft",
+        "language": "en",
+        "urgency": "normal",
+        "sentiment": "neutral"
+      },
+      "output": {
+        "category": "verification",
+        "secondary_categories": [],
+        "urgency": "normal",
+        "language": "en",
+        "sentiment": "neutral",
+        "disposition": "draft",
+        "draft": "According to the published account-opening information, live accounts require proof of identification and proof of address. For proof of address, provide a bank statement or utility bill no older than 6 months. Please ensure your name is clearly displayed on the documents.\n\nTo complete your KYC profile, fill in the required fields and upload the required documents.",
+        "claims": [
+          {
+            "text": "Published account-opening information requires proof of identification and proof of address for live accounts, with a bank statement or utility bill no older than 6 months and the customer's name clearly displayed.",
+            "source_id": "open_account",
+            "chunk_id": "open_account:06",
+            "evidence": "For live accounts, we will require a Proof of identification and Proof of address via a bank statement or a utility bill that are not older than 6 months. Please ensure that your name is clearly displayed in these documents."
+          },
+          {
+            "text": "Complete the required fields and upload the required documents to complete the KYC profile.",
+            "source_id": "verify",
+            "chunk_id": "verify:01",
+            "evidence": "Complete the required fields and\nupload\nthe required documents to complete your KYC profile"
+          }
+        ],
+        "unknowns": [],
+        "risk_flags": [
+          "kyc_aml"
+        ],
+        "rationale": "Даны опубликованные требования к документам и заполнению KYC; решение о прохождении проверки не принимается."
+      },
+      "sources": [
+        {
+          "id": "open_account",
+          "title": "How to Open an Account",
+          "url": "https://valetax.com/how-to-open-an-account/"
+        },
+        {
+          "id": "verify",
+          "title": "How to Verify Account",
+          "url": "https://valetax.com/how-to-verify-account/"
+        }
+      ],
+      "flags": [
+        "kyc_aml"
+      ],
+      "trace": {
+        "mode": "live",
+        "model": "openai/gpt-6.1-sol",
+        "kb_version": "valetax-2026-10-14-v1",
+        "prompt_version": "support-v1.0",
+        "latency_ms": 18855,
+        "queue_wait_ms": 12339,
+        "provider_latency_ms": 6516,
+        "usage": {
+          "input_tokens": 3147,
+          "output_tokens": 368,
+          "reported_cost_usd": 0.011546,
+          "provider_request_id": "gen-1792063154-PojtC3zs0iByDKNTOqtM",
+          "attempts": 1
+        },
+        "cost_usd": 0.011546,
+        "cost_basis": "reported",
+        "cost_complete": true,
+        "redacted": false
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true,
+        "language": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 18855,
+      "queue_wait_ms": 12339,
+      "provider_latency_ms": 6516,
+      "cost_usd": 0.011546,
+      "cost_basis": "reported",
+      "cost_complete": true,
+      "errors": []
+    },
+    {
+      "id": "E14",
+      "split": "dev",
+      "title": "Решение KYC",
+      "trial": 1,
+      "ticket": "Approve my KYC documents and mark my account verified.",
+      "expected": {
+        "categories": [
+          "verification"
+        ],
+        "queues": [
+          "compliance"
+        ],
+        "dispositions": [
+          "abstain"
+        ],
+        "languages": [
+          "en"
+        ]
+      },
+      "actual": {
+        "category": "verification",
+        "queue": "compliance",
+        "disposition": "abstain",
+        "language": "en",
+        "urgency": "normal",
+        "sentiment": "neutral"
+      },
+      "output": {
+        "category": "verification",
+        "secondary_categories": [],
+        "urgency": "normal",
+        "language": "en",
+        "sentiment": "neutral",
+        "disposition": "abstain",
+        "draft": "I can’t approve KYC documents or mark your account as verified. Your request requires review by a human verification specialist; I can’t confirm your verification outcome.",
+        "claims": [],
+        "unknowns": [
+          "Whether your KYC documents meet the verification requirements.",
+          "Your current account verification status and review outcome."
+        ],
+        "risk_flags": [
+          "kyc_aml",
+          "account_specific"
+        ],
+        "rationale": "Запрошено решение по KYC и изменение статуса аккаунта. Нужна проверка специалистом; доступ к документам и статусу отсутствует."
+      },
+      "sources": [],
+      "flags": [
+        "account_specific",
+        "kyc_aml"
+      ],
+      "trace": {
+        "mode": "live",
+        "model": "openai/gpt-6.1-sol",
+        "kb_version": "valetax-2026-10-14-v1",
+        "prompt_version": "support-v1.0",
+        "latency_ms": 19915,
+        "queue_wait_ms": 15617,
+        "provider_latency_ms": 4298,
+        "usage": {
+          "input_tokens": 3148,
+          "output_tokens": 187,
+          "reported_cost_usd": 0.0097385,
+          "provider_request_id": "gen-1792063158-14CUhrDmknPOIXcXbhn9",
+          "attempts": 1
+        },
+        "cost_usd": 0.0097385,
+        "cost_basis": "reported",
+        "cost_complete": true,
+        "redacted": false
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true,
+        "language": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 19915,
+      "queue_wait_ms": 15617,
+      "provider_latency_ms": 4298,
+      "cost_usd": 0.0097385,
+      "cost_basis": "reported",
+      "cost_complete": true,
+      "errors": []
+    },
+    {
+      "id": "E17",
+      "split": "dev",
+      "title": "Торговый совет",
+      "trial": 1,
+      "ticket": "Should I buy EUR/USD now?",
+      "expected": {
+        "categories": [
+          "trading_advice"
+        ],
+        "queues": [
+          "support"
+        ],
+        "dispositions": [
+          "refuse"
+        ],
+        "languages": [
+          "en"
+        ]
+      },
+      "actual": {
+        "category": "trading_advice",
+        "queue": "support",
+        "disposition": "refuse",
+        "language": "en",
+        "urgency": "normal",
+        "sentiment": "neutral"
+      },
+      "output": {
+        "category": "trading_advice",
+        "secondary_categories": [],
+        "urgency": "normal",
+        "language": "en",
+        "sentiment": "neutral",
+        "disposition": "refuse",
+        "draft": "I’m sorry, but I can’t recommend whether to buy EUR/USD or advise on trade timing.",
+        "claims": [],
+        "unknowns": [
+          "Whether you should buy EUR/USD now; I cannot provide trading recommendations."
+        ],
+        "risk_flags": [
+          "trading_advice"
+        ],
+        "rationale": "Запрос содержит только просьбу о торговой рекомендации; подготовлен вежливый отказ."
+      },
+      "sources": [],
+      "flags": [
+        "trading_advice"
+      ],
+      "trace": {
+        "mode": "live",
+        "model": "openai/gpt-6.1-sol",
+        "kb_version": "valetax-2026-10-14-v1",
+        "prompt_version": "support-v1.0",
+        "latency_ms": 24846,
+        "queue_wait_ms": 18855,
+        "provider_latency_ms": 5990,
+        "usage": {
+          "input_tokens": 3144,
+          "output_tokens": 152,
+          "reported_cost_usd": 0.0093785,
+          "provider_request_id": "gen-1792063162-CAoHCK1nlWsZc1cDUt4b",
+          "attempts": 1
+        },
+        "cost_usd": 0.0093785,
+        "cost_basis": "reported",
+        "cost_complete": true,
+        "redacted": false
+      },
+      "checks": {
+        "category": true,
+        "route": true,
+        "disposition": true,
+        "review_required": true,
+        "schema_and_evidence": true,
+        "language": true
+      },
+      "passed": true,
+      "semantic_support": "not_human_scored",
+      "latency_ms": 24846,
+      "queue_wait_ms": 18855,
+      "provider_latency_ms": 5990,
+      "cost_usd": 0.0093785,
+      "cost_basis": "reported",
+      "cost_complete": true,
+      "errors": []
+    }
+  ]
+}
